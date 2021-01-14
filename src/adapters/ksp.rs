@@ -1,4 +1,6 @@
+use std::io;
 use pyo3::prelude::*;
+use super::Adapter;
 
 
 pub struct AdapterKSP<'py> {
@@ -16,8 +18,8 @@ pub fn init<'py>(py: &'py Python) -> Result<AdapterKSP<'py>, &'static str> {
             e.print_and_set_sys_last_vars(*py);
             Err("Python error")
         },
-        Ok(AdapterKSP) => {
-            Ok(AdapterKSP)
+        Ok(ksp) => {
+            Ok(ksp)
         },
     }
 }
@@ -35,4 +37,14 @@ fn init_<'py>(py: &'py Python) -> PyResult<AdapterKSP<'py>> {
         krpc: krpc,
         conn: conn,
     })
+}
+
+impl Adapter for AdapterKSP<'_> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        Ok(0)
+    }
+
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        Ok(0)
+    }
 }
