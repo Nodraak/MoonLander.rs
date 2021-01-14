@@ -1,5 +1,7 @@
 # README.md
 
+## Introduction
+
 (Moon) lander.
 
 Diagram: https://blog.nodraak.fr/images/2020/08/aerospace-sim/Architecture.svg (From https://blog.nodraak.fr/2020/08/aerospace-sim-1-preliminary-study/)
@@ -17,3 +19,9 @@ KSP lib options for altitude input (used by Nav):
 * Radar Altimeter inside most (if not all) IVA
 * KER or mechjeb can give you that info, mechjeb can also give your time to impact.
 * KerbNet
+
+## Dependencies
+
+* KSP
+* Rust
+* Krpc: `sudo pip3 install krpc`

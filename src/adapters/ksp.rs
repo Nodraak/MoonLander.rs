@@ -1,22 +1,37 @@
 use pyo3::prelude::*;
-use pyo3::types::IntoPyDict;
 
-pub fn main() -> Result<(), ()> {
-    Python::with_gil(|py| {
-        main_(py).map_err(|e| {
-          // We can't display Python exceptions via std::fmt::Display,
-          // so print the error here manually.
-          e.print_and_set_sys_last_vars(py);
-        })
-    })
+pub struct KSP<'py> {
+    py: &'py Python<'py>,
+    krpc: &'py PyModule,    // krpc module
+    conn: &'py PyAny,       // krpc connection object
 }
 
-fn main_(py: Python) -> PyResult<()> {
-    let sys = py.import("sys")?;
-    let version: String = sys.get("version")?.extract()?;
-    let locals = [("os", py.import("os")?)].into_py_dict(py);
-    let code = "os.getenv('USER') or os.getenv('USERNAME') or 'Unknown'";
-    let user: String = py.eval(code, None, Some(&locals))?.extract()?;
-    println!("Hello {}, I'm Python {}", user, version);
-    Ok(())
+
+pub fn init<'py>(py: &'py Python) -> Result<KSP<'py>, &'static str> {
+    match init_(py) {
+        Err(e) => {
+            // TODO: handle errors better
+            println!("Python error:");
+            e.print_and_set_sys_last_vars(*py);
+            Err("Python error")
+        },
+        Ok(ksp) => {
+            Ok(ksp)
+        },
+    }
+}
+
+fn init_<'py>(py: &'py Python) -> PyResult<KSP<'py>> {
+    let krpc = py.import("krpc")?;
+    let conn = krpc.call_method0("connect")?;
+
+    let v = conn.getattr("krpc")?.call_method0("get_status")?.getattr("version")?;
+
+    println!("krpc v: {}", v);
+
+    Ok(KSP {
+        py: py,
+        krpc: krpc,
+        conn: conn,
+    })
 }
