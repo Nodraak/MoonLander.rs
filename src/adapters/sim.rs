@@ -1,7 +1,5 @@
-use std::io::prelude::*;
-use std::io;
 use std::net::TcpStream;
-use super::Adapter;
+use crate::adapters::common::{Adapter, SensorsValues, ActuatorsValues};
 
 
 pub struct AdapterSim {
@@ -30,11 +28,14 @@ fn init_() -> std::io::Result<AdapterSim> {
 }
 
 impl Adapter for AdapterSim {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        Ok(0)
+    fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
+        Ok(SensorsValues {
+            spacecraft_acc: (1.0, 1.0),
+            spacecraft_altitude: Some(1.0),
+        })
     }
 
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        Ok(0)
+    fn write_actuators(&self, values: ActuatorsValues) -> Result<(), &'static str> {
+        Ok(())
     }
 }

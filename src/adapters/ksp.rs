@@ -1,6 +1,5 @@
-use std::io;
 use pyo3::prelude::*;
-use super::Adapter;
+use crate::adapters::common::{Adapter, SensorsValues, ActuatorsValues};
 
 
 pub struct AdapterKSP<'py> {
@@ -32,6 +31,16 @@ fn init_<'py>(py: &'py Python) -> PyResult<AdapterKSP<'py>> {
 
     println!("krpc v: {}", v);
 
+    /*
+    vessel = conn.space_center.active_vessel
+    refframe = vessel.orbit.body.reference_frame
+
+    stream_func = vessel.position
+    stream_func_args = (refframe, )
+
+    read_position = conn.add_stream(stream_func, *stream_func_args)
+    */
+
     Ok(AdapterKSP {
         py: py,
         krpc: krpc,
@@ -40,11 +49,45 @@ fn init_<'py>(py: &'py Python) -> PyResult<AdapterKSP<'py>> {
 }
 
 impl Adapter for AdapterKSP<'_> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        Ok(0)
+    fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
+        /*
+        vessel
+            .mass -> integration from mass_flow (thrust ratio and isp)
+            .moment_of_inertia: 3-tuple
+            -> v1: get exact value ; maybe v2 estimate/compute
+
+        # https://krpc.github.io/krpc/python/api/space-center/flight.html#SpaceCenter.Flight
+        vessel.flight(reference_frame=XX)
+        -> altitude
+
+        vessel.surface_reference_frame
+        vessel.orbital_reference_frame
+        vessel.surface_velocity_reference_frame
+
+        vessel
+            .position(reference_frame)
+            .direction(reference_frame)
+            .velocity(reference_frame)
+
+        conn.space_center.transform_position
+
+        */
+        Ok(SensorsValues {
+            spacecraft_acc: (1.0, 1.0),
+            spacecraft_altitude: Some(1.0),
+        })
     }
 
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        Ok(0)
+    fn write_actuators(&self, values: ActuatorsValues) -> Result<(), &'static str> {
+        /*
+        # https://krpc.github.io/krpc/python/api/space-center/control.html#SpaceCenter.Control
+        vessel.control
+            .throttle
+            .pitch
+            .yaw
+            .roll
+        */
+
+        Ok(())
     }
 }

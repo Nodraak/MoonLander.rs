@@ -46,7 +46,6 @@ fn main() {
         ("gnc-sim", submatches) => {
             println!("Subcommand: gnc-sim");
 
-            // TODO
             let _sim = adapters::sim::init();
             // TODO run gnc
         },
