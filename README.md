@@ -1,27 +1,31 @@
+*Note: work in progress. Refer to [TODO.md](TODO.md) for the roadmap.*
+
 # README.md
 
-## Introduction
+(Moon) lander guidance software.
 
-(Moon) lander.
+The goal is to land on [KSP's Mun](https://wiki.kerbalspaceprogram.com/wiki/Mun).
+This repo comes with a simulator to verify the guidance before attempting a landing.
 
-Diagram: https://blog.nodraak.fr/images/2020/08/aerospace-sim/Architecture.svg (From https://blog.nodraak.fr/2020/08/aerospace-sim-1-preliminary-study/)
+## Architecture
+
+**Overview**
+
+The plan (From https://blog.nodraak.fr/2020/08/aerospace-sim-1-preliminary-study/):
+
+![](docs/images/Architecture.svg)
+
+**Implementation**
 
 GNC is implemented in Rust.
 
-I/O will be implemented via adapters:
+I/O will be implemented via adapters (to be able to swap between the simulator and KSP):
 
-* Custom simulator -> TCP server (Rust). TCP connection will be JSON (en|de)coded with Serde.
-* KSP -> embdded Python using Krpc lib (protobuf to KSP) (https://github.com/PyO3/pyo3 + https://krpc.github.io/krpc/).
-
-KSP lib options for altitude input (used by Nav):
-
-* Kerbal Engineer Redux displays "Altitude to Terrain"
-* Radar Altimeter inside most (if not all) IVA
-* KER or mechjeb can give you that info, mechjeb can also give your time to impact.
-* KerbNet
+* Simulator: direct (Rust) function calls
+* KSP: calling Python from Rust (https://github.com/PyO3/pyo3), itself calling Krpc lib (protobuf to KSP) (https://krpc.github.io/krpc/)
 
 ## Dependencies
 
-* KSP
 * Rust
+* KSP
 * Krpc: `sudo pip3 install krpc`

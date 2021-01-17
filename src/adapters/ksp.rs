@@ -71,6 +71,13 @@ impl Adapter for AdapterKSP<'_> {
 
         conn.space_center.transform_position
 
+        Other options: KSP mods:
+
+        * Kerbal Engineer Redux displays "Altitude to Terrain"
+        * Radar Altimeter inside most (if not all) IVA
+        * KER or mechjeb can give you that info, mechjeb can also give your time to impact.
+        * KerbNet
+
         */
         Ok(SensorsValues {
             spacecraft_acc: (1.0, 1.0),
