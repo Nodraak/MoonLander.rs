@@ -1,8 +1,24 @@
+mod adapters;
+mod sim;
+
 use std::process::exit;
 use clap;
 use pyo3::prelude::*;
 
-pub mod adapters;
+
+fn land(adapter: &dyn adapters::common::Adapter) {
+    loop {
+        // TODO
+        // adapter.read_sensors();
+        // gnc::nav();
+        // gnc::gui();
+        // gnc::ctr();
+        // adapter.write_sensors();
+        // adapter.tick();
+
+        // TODO break condition
+    }
+}
 
 
 fn main() {
@@ -20,14 +36,10 @@ fn main() {
         )
         .subcommand(
             clap::SubCommand::with_name("sim")
-            .about("starts a sim server")
+            .about("runs a simulation")
         )
         .subcommand(
-            clap::SubCommand::with_name("gnc-sim")
-            .about("connects to a sim server")
-        )
-        .subcommand(
-            clap::SubCommand::with_name("gnc-ksp")
+            clap::SubCommand::with_name("ksp")
             .about("connects to ksp")
         )
         .get_matches();
@@ -41,25 +53,22 @@ fn main() {
         ("sim", submatches) => {
             println!("Subcommand: sim");
 
-            // TODO start sim server
-        },
-        ("gnc-sim", submatches) => {
-            println!("Subcommand: gnc-sim");
+            let adapter = adapters::sim::init().unwrap();  // TODO handle error
 
-            let _sim = adapters::sim::init();
-            // TODO run gnc
+            land(&adapter);
         },
-        ("gnc-ksp", submatches) => {
-            println!("Subcommand: gnc-ksp");
+        ("ksp", submatches) => {
+            println!("Subcommand: ksp");
 
             let gil = Python::acquire_gil();
             let py = gil.python();
 
-            let _ksp = adapters::ksp::init(&py);
-            // TOOD run gnc
+            let adapter = adapters::ksp::init(&py).unwrap();  // TODO handle error
+
+            land(&adapter);
         },
         _ => {
-            println!("Error: expected SubCommand: sim|gnc-sim|gnc-ksp");
+            println!("Error: expected SubCommand: sim|ksp");
             exit(1);
         }
     }

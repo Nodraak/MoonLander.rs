@@ -90,4 +90,8 @@ impl Adapter for AdapterKSP<'_> {
 
         Ok(())
     }
+
+    fn tick(&self) {
+        // TODO: sleep X ms
+    }
 }

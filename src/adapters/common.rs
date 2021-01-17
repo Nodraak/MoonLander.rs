@@ -1,6 +1,7 @@
 pub trait Adapter {
     fn read_sensors(&self) -> Result<SensorsValues, &'static str>;
     fn write_actuators(&self, values: ActuatorsValues) -> Result<(), &'static str>;
+    fn tick(&self);
 }
 
 /// Note: Sim is 2D, KSP will project on the (velocity vector, local vertical) plane

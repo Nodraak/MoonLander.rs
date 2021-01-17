@@ -1,9 +1,9 @@
-use std::net::TcpStream;
 use crate::adapters::common::{Adapter, SensorsValues, ActuatorsValues};
+use crate::sim::Sim;
 
 
 pub struct AdapterSim {
-    stream: TcpStream,
+    sim: Sim,
 }
 
 
@@ -19,11 +19,11 @@ pub fn init() -> Result<AdapterSim, &'static str> {
     }
 }
 
-fn init_() -> std::io::Result<AdapterSim> {
-    let stream = TcpStream::connect("127.0.0.1:34254")?;
+fn init_() -> Result<AdapterSim, &'static str> {
+    let sim = Sim::new();
 
     Ok(AdapterSim {
-        stream: stream,
+        sim: sim,
     })
 }
 
@@ -37,5 +37,10 @@ impl Adapter for AdapterSim {
 
     fn write_actuators(&self, values: ActuatorsValues) -> Result<(), &'static str> {
         Ok(())
+    }
+
+    fn tick(&self) {
+        self.sim.tick();
+        // TODO: if real time: sleep X ms
     }
 }
