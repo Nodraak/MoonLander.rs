@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 use crate::adapters::common::{Adapter, SensorsValues, ActuatorsValues};
+use crate::utils::math::Vec2;
 
 
 pub struct AdapterKSP<'py> {
@@ -80,12 +81,12 @@ impl Adapter for AdapterKSP<'_> {
 
         */
         Ok(SensorsValues {
-            spacecraft_acc: (1.0, 1.0),
+            spacecraft_acc: Vec2 {x: 1.0, y: 1.0},
             spacecraft_altitude: Some(1.0),
         })
     }
 
-    fn write_actuators(&self, values: ActuatorsValues) -> Result<(), &'static str> {
+    fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
         /*
         # https://krpc.github.io/krpc/python/api/space-center/control.html#SpaceCenter.Control
         vessel.control
@@ -96,9 +97,5 @@ impl Adapter for AdapterKSP<'_> {
         */
 
         Ok(())
-    }
-
-    fn tick(&self) {
-        // TODO: sleep X ms
     }
 }

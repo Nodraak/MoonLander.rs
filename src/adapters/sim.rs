@@ -29,18 +29,10 @@ fn init_() -> Result<AdapterSim, &'static str> {
 
 impl Adapter for AdapterSim {
     fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
-        Ok(SensorsValues {
-            spacecraft_acc: (1.0, 1.0),
-            spacecraft_altitude: Some(1.0),
-        })
+        self.sim.read_sensors()
     }
 
-    fn write_actuators(&self, values: ActuatorsValues) -> Result<(), &'static str> {
-        Ok(())
-    }
-
-    fn tick(&self) {
-        self.sim.tick();
-        // TODO: if real time: sleep X ms
+    fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
+        self.sim.write_actuators(control)
     }
 }

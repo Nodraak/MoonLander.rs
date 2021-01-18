@@ -1,6 +1,6 @@
 
 /// Main control function
-pub fn control() {
+pub fn ctr() {
     spacecraft_controler();
     engine_controler();
 }
