@@ -24,8 +24,28 @@ I/O will be implemented via adapters (to be able to swap between the simulator a
 * Simulator: direct (Rust) function calls
 * KSP: calling Python from Rust (https://github.com/PyO3/pyo3), itself calling Krpc lib (protobuf to KSP) (https://krpc.github.io/krpc/)
 
-## Dependencies
+## Building and running
+
+**Dependencies**
 
 * Rust
-* KSP
-* Krpc: `sudo pip3 install krpc`
+* For KSP subcommand
+    * KSP game
+    * Krpc addon: `sudo pip3 install krpc`
+
+**Building**
+
+`cargo build`
+
+**Running**
+
+*Warning: infinite loop will hog CPU and RAM*
+
+Sim:
+
+1. `cargo run sim`
+
+KSP:
+
+1. Start KSP and Krpc
+2. `cargo run ksp`
