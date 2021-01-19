@@ -1,8 +1,16 @@
+use crate::adapters::common::ActuatorsValues;
+use crate::gnc::common::Spacecraft;
 
 /// Main control function
-pub fn ctr() {
-    spacecraft_controler();
-    engine_controler();
+pub fn ctr(spacecraft: &Spacecraft) -> ActuatorsValues {
+    spacecraft_controler(spacecraft);
+    engine_controler(spacecraft);
+
+    // TODO
+    ActuatorsValues {
+        engine_gimbal: 0.0,
+        engine_throttle: 0.0,
+    }
 }
 
 /// Spacecraft control function
@@ -14,7 +22,7 @@ pub fn ctr() {
 /// Output:
 ///     commanded thrust (respecting engine constraints)
 ///     commanded (ideal) (spacecraft) attitude angle
-fn spacecraft_controler() {
+fn spacecraft_controler(spacecraft: &Spacecraft) {
     /*
     TODO
 
@@ -49,7 +57,7 @@ fn spacecraft_controler() {
 ///     sc_eng_thrust, sc_eng_gimbal_current, sc_eng_gimbal_max
 /// Output:
 ///     commanded (engine) gimbal_angle (respecting engine constraints)
-fn engine_controler() {
+fn engine_controler(spacecraft: &Spacecraft) {
     /*
     TODO
 

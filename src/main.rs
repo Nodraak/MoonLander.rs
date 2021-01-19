@@ -1,26 +1,41 @@
 mod adapters;
 mod gnc;
 mod sim;
+mod spacecraft;
 mod utils;
 
 use std::process::exit;
 use clap;
 use pyo3::prelude::*;
-use crate::adapters::common::ActuatorsValues;
+use crate::gnc::common::Spacecraft;
 
 
-fn land(adapter: &mut dyn adapters::common::Adapter) {
+// TODO check rust enum
+#[derive(PartialEq)]
+enum Mode {
+    SimFastest,
+    SimRealTime,
+    Ksp,
+}
+
+
+fn land(mode: Mode, adapter: &mut dyn adapters::common::Adapter) {
+    let mut sc = Spacecraft::new();
+
     loop {
-        // TODO
-        let _ = adapter.read_sensors();
-        // gnc::nav();
-        gnc::guidance::gui();
-        gnc::control::ctr();
-        let _ = adapter.write_actuators(ActuatorsValues {engine_gimbal: 0.0, engine_throttle: 0.0});
+        let sensors_vals = adapter.read_sensors().unwrap();
+
+        gnc::navigation::nav(&mut sc, sensors_vals);
+        gnc::guidance::gui(&sc);
+        let actuators_vals = gnc::control::ctr(&sc);
+
+        adapter.write_actuators(actuators_vals);
 
         // TODO break condition
 
-        // TODO: sleep X ms if needed
+        if mode == Mode::SimRealTime || mode == Mode::Ksp {
+            // TODO sleep X ms
+        }
     }
 }
 
@@ -59,7 +74,7 @@ fn main() {
 
             let mut adapter = adapters::sim::init().unwrap();  // TODO handle error
 
-            land(&mut adapter);
+            land(Mode::SimFastest, &mut adapter);
         },
         ("ksp", submatches) => {
             println!("Subcommand: ksp");
@@ -69,7 +84,7 @@ fn main() {
 
             let mut adapter = adapters::ksp::init(&py).unwrap();  // TODO handle error
 
-            land(&mut adapter);
+            land(Mode::Ksp, &mut adapter);
         },
         _ => {
             println!("Error: expected SubCommand: sim|ksp");

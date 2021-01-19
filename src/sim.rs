@@ -1,19 +1,13 @@
 use crate::adapters::common::{SensorsValues, ActuatorsValues};
+use crate::spacecraft::{SpacecraftStatic, SpacecraftDynamic};
 use crate::utils::math::Vec2;
 use crate::utils::space::{moon_centrifugal, moon_gravity};
 
 
 #[derive(Clone, Copy)]
 pub struct SimValues {
-    t: f64,                         // unit: sec - time since beginning of simulation
-
     // changing properties
-    sc_fuel_mass: f64,              // unit: kg
-    sc_pos: Vec2,                   // unit: m
-    sc_vel: Vec2,                   // unit: m/s
-    sc_acc: Vec2,                   // unit: m/s**2
-    sc_ang_pos: f64,                // unit: rad
-    sc_ang_vel: f64,                // unit: rad/s
+    sc: SpacecraftDynamic,
 
     // control
     engine_gimbal: f64,             // unit: rad
@@ -22,48 +16,41 @@ pub struct SimValues {
 
 
 pub struct Sim {
-    // fixed properties
-    engine_nominal_thrust: f64,         // unit: N
-    engine_nominal_mass_flow: f64,      // unit: kg/s
-    sc_dry_mass: f64,                   // unit: kg
-
-    // latest changing properties
-    cur: SimValues,
-
-    // all changing properties
-    all: Vec<SimValues>,
+    spec: SpacecraftStatic,         // fixed properties
+    cur: SimValues,                 // latest changing properties
+    all: Vec<SimValues>,            // all changing properties
 }
 
 
 impl Sim {
     pub fn new() -> Sim {
         Sim {
-            engine_nominal_thrust: 0.0,
-            engine_nominal_mass_flow: 1.0, // TODO from conf
-            sc_dry_mass: 0.0,  // TODO from conf
-
+            spec: SpacecraftStatic {
+                nominal_thrust: 0.0,
+                nominal_mass_flow: 1.0, // TODO from conf
+                dry_mass: 0.0,  // TODO from conf
+            },
             cur: SimValues {
-                t: 0.0,
-
-                sc_fuel_mass: 0.0,  // TODO from conf
-                sc_pos: Vec2 {x: 0.0, y: 0.0},
-                sc_vel: Vec2 {x: 0.0, y: 0.0},
-                sc_acc: Vec2 {x: 0.0, y: 0.0},
-                sc_ang_pos: 0.0,
-                sc_ang_vel: 0.0,
-
+                sc: SpacecraftDynamic {
+                    t: 0.0,
+                    fuel_mass: 0.0,  // TODO from conf
+                    pos: Vec2 {x: 0.0, y: 0.0},
+                    vel: Vec2 {x: 0.0, y: 0.0},
+                    acc: Vec2 {x: 0.0, y: 0.0},
+                    ang_pos: 0.0,
+                    ang_vel: 0.0,
+                },
                 engine_gimbal: 0.0,
                 engine_throttle: 0.0,
             },
-
             all: vec![],
         }
     }
 
     pub fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
         Ok(SensorsValues {
-            spacecraft_acc: self.cur.sc_acc,
-            spacecraft_altitude: Some(self.cur.sc_pos.y),
+            spacecraft_acc: self.cur.sc.acc,
+            spacecraft_altitude: Some(self.cur.sc.pos.y),
         })
     }
 
@@ -74,36 +61,36 @@ impl Sim {
 
         // TODO first compute torque and update sc_angle, then compute sc_acc
 
-        let sc_mass = self.sc_dry_mass + self.cur.sc_fuel_mass;
+        let sc_mass = self.spec.dry_mass + self.cur.sc.fuel_mass;
 
-        let engine_acc_norm = control.engine_throttle * self.engine_nominal_thrust/sc_mass;
-        let engine_acc = Vec2::new_polar(engine_acc_norm, self.cur.sc_ang_pos);
+        let engine_acc_norm = control.engine_throttle * self.spec.nominal_thrust/sc_mass;
+        let engine_acc = Vec2::new_polar(engine_acc_norm, self.cur.sc.ang_pos);
         let gravity_acc = Vec2 {
             x: 0.0,
             y:
-                - moon_gravity(self.cur.sc_pos.y)
-                + moon_centrifugal(self.cur.sc_vel.x, self.cur.sc_pos.y),
+                - moon_gravity(self.cur.sc.pos.y)
+                + moon_centrifugal(self.cur.sc.vel.x, self.cur.sc.pos.y),
         };
         let sc_acc = engine_acc + gravity_acc;
         // self.g = self.acc_y/G0
 
-        let sc_vel = self.cur.sc_vel + sc_acc*dt;
-        let sc_pos = self.cur.sc_pos + sc_vel*dt;
+        let sc_vel = self.cur.sc.vel + sc_acc*dt;
+        let sc_pos = self.cur.sc.pos + sc_vel*dt;
 
-        let sc_fuel_mass = self.cur.sc_fuel_mass - self.engine_nominal_mass_flow*control.engine_throttle*dt;
+        let sc_fuel_mass = self.cur.sc.fuel_mass - self.spec.nominal_mass_flow*control.engine_throttle*dt;
 
         // self.dv_flight += acc*dt
 
-        let t = self.cur.t + dt;
+        let t = self.cur.sc.t + dt;
 
         // save everything
 
-        self.cur.t = t;
+        self.cur.sc.t = t;
 
-        self.cur.sc_fuel_mass = sc_fuel_mass;
-        self.cur.sc_pos = sc_pos;
-        self.cur.sc_vel = sc_vel;
-        self.cur.sc_acc = sc_acc;
+        self.cur.sc.fuel_mass = sc_fuel_mass;
+        self.cur.sc.pos = sc_pos;
+        self.cur.sc.vel = sc_vel;
+        self.cur.sc.acc = sc_acc;
         // self.cur.sc_ang_pos = sc_ang_pos; TODO
         // self.cur.sc_ang_vel = sc_ang_vel; TODO
 

@@ -1,5 +1,6 @@
+use crate::gnc::common::Spacecraft;
 
-pub fn gui() { // (craft, acc_cmd_x, acc_cmd_y, s, TGO):
+pub fn gui(spacecraft: &Spacecraft) { // (craft, acc_cmd_x, acc_cmd_y, s, TGO):
     /*
     TODO
 
