@@ -1,14 +1,39 @@
 use crate::gnc::common::Spacecraft;
+use crate::utils::math::Vec2;
+use crate::utils::space::{moon_centrifugal, moon_gravity};
 
-pub fn gui(spacecraft: &Spacecraft) { // (craft, acc_cmd_x, acc_cmd_y, s, TGO):
-    /*
-    TODO
 
-    moon_acc_y = -moon_gravity(craft.pos_y) +moon_centrifugal(craft.vel_x, craft.pos_y)
+/// Quadratic law: acc = af -6/tgo*(v0+vf) + 12/tgo.powi(2)*(pf-p0)
+pub fn gui(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 
-    a_x = acc_cmd_x.subs(s['v0'], craft.vel_x).subs(s['p0'], craft.pos_x).subs(s['tgo'], TGO)
-    a_y = acc_cmd_y.subs(s['v0'], craft.vel_y).subs(s['p0'], craft.pos_y).subs(s['tgo'], TGO)
+    let moon_acc_y = -moon_gravity(spacecraft.cur.pos.y) +moon_centrifugal(spacecraft.cur.vel.x, spacecraft.cur.pos.y);
 
-    return a_x, a_y-moon_acc_y
-    */
+    // x
+
+    let af_x = 0.0;
+    let vf_x = 0.0;
+    let pf_x = 390_000.0;  // TODO from conf
+
+    let v0_x = spacecraft.cur.vel.x;
+    let p0_x = spacecraft.cur.pos.x;
+
+    let acc_x = af_x -6.0/tgo*(v0_x+vf_x) + 12.0/tgo.powi(2)*(pf_x-p0_x);
+
+    // y
+
+    let af_y = 0.0;
+    let vf_y = 0.0;
+    let pf_y = 0.0;
+
+    let v0_y = spacecraft.cur.vel.y;
+    let p0_y = spacecraft.cur.pos.y;
+
+    let acc_y = af_y -6.0/tgo*(v0_y+vf_y) + 12.0/tgo.powi(2)*(pf_y-p0_y);
+
+    // return
+
+    Vec2 {
+        x: acc_x,
+        y: acc_y-moon_acc_y,
+    }
 }

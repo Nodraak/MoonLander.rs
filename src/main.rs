@@ -22,12 +22,14 @@ enum Mode {
 fn land(mode: Mode, adapter: &mut dyn adapters::common::Adapter) {
     let mut sc = Spacecraft::new();
 
-    loop {
+    for tgo_ in 0..500 {
+        let tgo = 500-tgo_;
+
         let sensors_vals = adapter.read_sensors().unwrap();
 
         gnc::navigation::nav(&mut sc, sensors_vals);
-        gnc::guidance::gui(&sc);
-        let actuators_vals = gnc::control::ctr(&sc);
+        let gui_out = gnc::guidance::gui(&sc, tgo as f64);
+        let actuators_vals = gnc::control::ctr(&mut sc, gui_out);
 
         adapter.write_actuators(actuators_vals);
 

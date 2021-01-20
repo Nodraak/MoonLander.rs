@@ -1,6 +1,7 @@
-use std::ops::{Add, Mul};
+use std::ops::{Add, AddAssign, Mul};
 
 
+#[derive(Debug)]
 #[derive(Clone, Copy)]
 pub struct Vec2 {
     pub x: f64,  // horizontal axis
@@ -31,6 +32,14 @@ impl Add for Vec2 {
 }
 
 
+impl AddAssign for Vec2 {
+    fn add_assign(&mut self, other: Self) {
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
+
 impl Mul<f64> for Vec2 {
     type Output = Self;
 
@@ -39,5 +48,25 @@ impl Mul<f64> for Vec2 {
             x: self.x + other,
             y: self.y + other,
         }
+    }
+}
+
+
+pub fn sign(val: f64) -> f64 {
+    if val < 0.0 {
+        -1.0
+    } else {
+        1.0
+    }
+}
+
+
+pub fn saturate(val: f64, min: f64, max: f64) -> f64 {
+    if val < min {
+        min
+    } else if max < val {
+        max
+    } else {
+        val
     }
 }
