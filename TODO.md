@@ -3,8 +3,9 @@
 0. Basic
     * [ok] Rust Hello world
 1. Sim
-    * [wip] Reimplement python prototype
-    * [wip] Add spacecraft angle (torque, inertia, ...)
+    * [ok] Reimplement python prototype
+    * [ok] Add spacecraft angle (torque, inertia, ...)
+    * [wip] Write some tests to verify the algorithms
     * Add fancy nav (vel and pos)
         * From acc integration
         * From radar altimeter meas integration
@@ -16,7 +17,7 @@
     * Implement Krpc interfaces (read & write)
     * Test whole I/O chain (read & write)
 3. Update lander spec
-4. Start Nodraak's space program
-    * Test launch to orbit
+4. Start Nodraak's space program on KSP
+    * Test launch (orbitial or suborbital, with or without landing)
     * Land on the Mun!
 5. Write some blog articles

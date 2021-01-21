@@ -39,13 +39,11 @@ I/O will be implemented via adapters (to be able to swap between the simulator a
 
 **Running**
 
-*Warning: infinite loop will hog CPU and RAM*
-
 Sim:
 
-1. `cargo run sim`
+1. `cargo run -- sim`
 
 KSP:
 
 1. Start KSP and Krpc
-2. `cargo run ksp`
+2. `cargo run -- ksp`
