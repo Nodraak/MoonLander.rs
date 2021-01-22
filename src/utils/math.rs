@@ -45,8 +45,8 @@ impl Mul<f64> for Vec2 {
 
     fn mul(self, other: f64) -> Self {
         Self {
-            x: self.x + other,
-            y: self.y + other,
+            x: self.x * other,
+            y: self.y * other,
         }
     }
 }
