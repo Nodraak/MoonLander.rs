@@ -30,6 +30,7 @@ pub struct SpacecraftDynamic {
 
     pub ang_pos: f64,                   // unit: rad
     pub ang_vel: f64,                   // unit: rad/s
+    pub ang_acc: f64,                   // unit: rad/s**2
 }
 
 
@@ -60,6 +61,7 @@ impl SpacecraftDynamic {
 
             ang_pos: 180.0*PI/180.0,
             ang_vel: 0.0,
+            ang_acc: 0.0,
         }
     }
 }

@@ -8,8 +8,11 @@ pub trait Adapter {
 
 /// Note: Sim is 2D, KSP will project on the (velocity vector, local vertical) plane
 pub struct SensorsValues {
-    pub spacecraft_acc: Vec2,               // unit: m/s
-    pub spacecraft_altitude: Option<f64>,   // unit: m - from radar altimeter
+    // from accelerometers
+    pub spacecraft_acc: Vec2,               // unit: m/s**2
+    pub spacecraft_ang_acc: f64,            // unit: rad/s**2
+    // from radar altimeter
+    pub spacecraft_altitude: Option<f64>,   // unit: m
 }
 
 /// Note: Sim is 2D, KSP will project on the (velocity vector, local vertical) plane

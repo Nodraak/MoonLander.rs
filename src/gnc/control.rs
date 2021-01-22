@@ -19,8 +19,8 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
     spacecraft.cur.eng_gimbal = ctr_eng_gimbal;
 
     ActuatorsValues {
-        engine_throttle: ctr_sc_thrust/sc_thrust,
-        engine_gimbal: ctr_eng_gimbal,
+        engine_throttle: spacecraft.cur.eng_throttle,
+        engine_gimbal: spacecraft.cur.eng_gimbal,
     }
 }
 

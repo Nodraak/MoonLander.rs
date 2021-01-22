@@ -25,6 +25,7 @@ impl Sim {
     pub fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
         Ok(SensorsValues {
             spacecraft_acc: self.cur.acc,
+            spacecraft_ang_acc: self.cur.ang_acc,
             spacecraft_altitude: Some(self.cur.pos.y),
         })
     }
@@ -77,6 +78,7 @@ impl Sim {
 
         self.cur.ang_pos = sc_ang_pos;
         self.cur.ang_vel = sc_ang_vel;
+        self.cur.ang_acc = sc_ang_acc;
 
         self.cur.pos = sc_pos;
         self.cur.vel = sc_vel;

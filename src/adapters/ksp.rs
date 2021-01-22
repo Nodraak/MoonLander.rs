@@ -82,6 +82,7 @@ impl Adapter for AdapterKSP<'_> {
         */
         Ok(SensorsValues {
             spacecraft_acc: Vec2 {x: 1.0, y: 1.0},
+            spacecraft_ang_acc: 1.0,
             spacecraft_altitude: Some(1.0),
         })
     }

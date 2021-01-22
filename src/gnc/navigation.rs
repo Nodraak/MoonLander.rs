@@ -4,10 +4,14 @@ use crate::utils::math::Vec2;
 
 
 pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: SensorsValues) {
-    spacecraft.cur.acc = sensors_vals.spacecraft_acc;
+    // TODO dt
 
+    spacecraft.cur.acc = sensors_vals.spacecraft_acc;
     spacecraft.cur.vel += spacecraft.cur.acc;
     spacecraft.cur.pos += spacecraft.cur.vel;
+
+    spacecraft.cur.ang_vel += sensors_vals.spacecraft_ang_acc;
+    spacecraft.cur.ang_pos += spacecraft.cur.ang_vel;
 
     // TODO cross check altitude - kalman filter?
 }
