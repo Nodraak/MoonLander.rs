@@ -37,3 +37,14 @@ pub fn gui(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
         y: acc_y-moon_acc_y,
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_gui_1() {
+        // TODO
+    }
+}
