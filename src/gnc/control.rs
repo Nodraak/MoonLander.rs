@@ -15,11 +15,11 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
     let (ctr_sc_thrust, ctr_sc_angle) = spacecraft_controler(goal_acc, sc_mass, sc_thrust);
     let ctr_eng_gimbal = engine_controler(ctr_sc_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
 
-    spacecraft.cur.eng_throttle = ctr_sc_thrust;
+    spacecraft.cur.eng_throttle = ctr_sc_thrust/sc_thrust;
     spacecraft.cur.eng_gimbal = ctr_eng_gimbal;
 
     ActuatorsValues {
-        engine_throttle: ctr_sc_thrust,
+        engine_throttle: ctr_sc_thrust/sc_thrust,
         engine_gimbal: ctr_eng_gimbal,
     }
 }
@@ -286,5 +286,10 @@ mod tests {
             let eng_gimbal = engine_controler(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
             assert_approx_eq!(eng_gimbal, eng_gimbal_ref + 2.0*0.25*PI/180.0, 1e-4);
         }
+    }
+
+    #[test]
+    fn test_gui_4_ctr() {
+        // TODO test ctr()
     }
 }

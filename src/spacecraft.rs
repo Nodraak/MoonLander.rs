@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use crate::utils::math::Vec2;
 
 
@@ -56,7 +58,7 @@ impl SpacecraftDynamic {
             vel: Vec2 {x: 1673.0, y: 0.0},  // TODO from conf - (MOON_MU/(MOON_RADIUS+15_000))**.5
             acc: Vec2 {x: 0.0, y: 0.0},
 
-            ang_pos: 0.0,
+            ang_pos: 180.0*PI/180.0,
             ang_vel: 0.0,
         }
     }
