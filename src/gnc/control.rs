@@ -9,11 +9,12 @@ use crate::utils::math::{Vec2, sign, saturate};
 pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
     let sc_mass = spacecraft.spec.dry_mass + spacecraft.cur.fuel_mass;
     let sc_thrust = spacecraft.spec.nominal_thrust;
-    let sc_att_cur = spacecraft.cur.ang_pos;
+    let sc_ang_pos = spacecraft.cur.ang_pos;
+    let sc_ang_vel = spacecraft.cur.ang_vel;
     let eng_gimbal_cur = spacecraft.cur.eng_gimbal;
 
-    let (ctr_sc_thrust, ctr_sc_angle) = spacecraft_controler(goal_acc, sc_mass, sc_thrust);
-    let ctr_eng_gimbal = engine_controler(ctr_sc_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
+    let (ctr_sc_thrust, ctr_ang_pos) = spacecraft_controler(goal_acc, sc_mass, sc_thrust);
+    let ctr_eng_gimbal = engine_controler(ctr_ang_pos, sc_mass, sc_thrust, sc_ang_pos, sc_ang_vel, eng_gimbal_cur);
 
     spacecraft.cur.eng_throttle = ctr_sc_thrust/sc_thrust;
     spacecraft.cur.eng_gimbal = ctr_eng_gimbal;
@@ -25,7 +26,7 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
 }
 
 
-/// Spacecraft control function
+/// Spacecraft control function (high level control)
 ///
 /// Input:
 ///     goal_acc_x, goal_acc_y
@@ -51,7 +52,7 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
     }
     // else, try to save what can be saved (fulfill y, best effort x)
     else {
-        println!("WARN: thrust norm {}", ctr_thrust/sc_thrust);
+        println!("WARN: thrust norm {} times the available thrust", ctr_thrust/sc_thrust);
         ctr_thrust = sc_thrust;
 
         ctr_angle = (goal_acc.y*sc_mass/sc_thrust).asin();
@@ -64,7 +65,10 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
 }
 
 
-/// Engine controller function
+/// Engine controller function (low level control)
+///
+/// Controller implemented as a double (cascade) PID to control the spacecraft
+/// ang_pos via its ang_acc (engine gimbal).
 ///
 /// Input:
 ///     sc_attitude_desired, sc_attitude_current
@@ -72,7 +76,26 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
 ///     sc_eng_thrust, sc_eng_gimbal_current, sc_eng_gimbal_max
 /// Output:
 ///     commanded (engine) gimbal_angle (respecting engine constraints)
-fn engine_controler(ctr_angle: f64, sc_mass: f64, sc_thrust: f64, sc_att_cur: f64, eng_gimbal_cur: f64) -> f64 {
+///
+/// Double PID block diagram:
+///
+/// ctr_ang_pos ----\
+///                 |
+/// sc_ang_pos -----O
+///                 | ang_pos_err
+///                 V
+///               PID 1
+///                 |
+///                 | ctr_ang_vel
+///                 |
+/// sc_ang_vel -----O
+///                 | ang_vel_err
+///                 V
+///               PID 2
+///                 |
+///                 | ctr_ang_acc
+///
+fn engine_controler(ctr_ang_pos: f64, sc_mass: f64, sc_thrust: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
 
     // TODO conf
     let max_eng_gimbal_pos = 4.0*PI/180.0;  // 4 deg
@@ -80,19 +103,21 @@ fn engine_controler(ctr_angle: f64, sc_mass: f64, sc_thrust: f64, sc_att_cur: f6
     let sc_width: f64 = 4.0;  // m
     let sc_height = 8.0;  // m
 
-    // compute att error
+    // ang_pos_err and ctr_ang_vel - PID 1
 
-    let sc_attitude_error = ctr_angle - sc_att_cur;
+    let ang_pos_err = ctr_ang_pos - sc_ang_pos;
+    let ctr_ang_vel = ang_pos_err * 0.5; // TODO PD. For now, assume a correction with T = 1 everywhere
+    // TODO check ctr_ang_vel: max 5 deg/sec -> How? Or dont check at all?
+
+    // ang_vel_err and ctr_ang_acc - PID 2
+
+    let ang_vel_err = ctr_ang_vel - sc_ang_vel;
+    let ctr_ang_acc = ang_vel_err; // TODO PD. For now, assume a correction with T = 1 everywhere
 
     // compute torque for correction
 
     let sc_moment_of_inertia = 0.5 * sc_mass * (sc_width/2.0).powi(2);  // 1/2*m*r**2 = kg.m**2
-
-    // TODO check sc angular vel: max 5 deg/sec -> How? Or dont check at all?
-
-    let ctr_sc_att_acc = sc_attitude_error; // TODO PID. For now, assume a correction with T = 1 everywhere
-
-    let ctr_torque = sc_moment_of_inertia * ctr_sc_att_acc;  // N*m = kg*m**2 * rad/sec**2
+    let ctr_torque = ctr_ang_acc * sc_moment_of_inertia;  // N*m = kg*m**2 * rad/sec**2
 
     // compute engine gimbal
 

@@ -22,8 +22,8 @@ enum Mode {
 fn land(mode: Mode, adapter: &mut dyn adapters::common::Adapter) {
     let mut sc = Spacecraft::new();
 
-    for tgo_ in 0..500 {
-        let tgo = 500-tgo_;
+    for tgo_ in 0..600 {
+        let tgo = 600-tgo_;
 
         let sensors_vals = adapter.read_sensors().unwrap();
 
