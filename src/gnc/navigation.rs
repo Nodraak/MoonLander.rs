@@ -13,6 +13,8 @@ pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: SensorsValues) {
     spacecraft.cur.ang_vel += sensors_vals.spacecraft_ang_acc;
     spacecraft.cur.ang_pos += spacecraft.cur.ang_vel;
 
+    // TODO update mass + check other sc properties
+
     // TODO cross check altitude - kalman filter?
 }
 
