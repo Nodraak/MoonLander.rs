@@ -1,10 +1,11 @@
 use crate::adapters::common::SensorsValues;
 use crate::gnc::common::Spacecraft;
-use crate::utils::math::Vec2;
 
 
 pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: SensorsValues) {
     // TODO dt
+
+    spacecraft.cur.fuel_mass -= spacecraft.spec.nominal_mass_flow*spacecraft.cur.eng_throttle;
 
     spacecraft.cur.acc = sensors_vals.spacecraft_acc;
     spacecraft.cur.vel += spacecraft.cur.acc;
@@ -13,9 +14,10 @@ pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: SensorsValues) {
     spacecraft.cur.ang_vel += sensors_vals.spacecraft_ang_acc;
     spacecraft.cur.ang_pos += spacecraft.cur.ang_vel;
 
-    // TODO update mass + check other sc properties
-
     // TODO cross check altitude - kalman filter?
+
+    // save everything
+    spacecraft.all.push(spacecraft.cur);
 }
 
 

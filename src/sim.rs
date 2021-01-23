@@ -1,5 +1,3 @@
-use std::f64::consts::PI;
-
 use crate::adapters::common::{SensorsValues, ActuatorsValues};
 use crate::spacecraft::{SpacecraftStatic, SpacecraftDynamic};
 use crate::utils::math::Vec2;
