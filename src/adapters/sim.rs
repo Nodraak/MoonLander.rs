@@ -35,4 +35,12 @@ impl Adapter for AdapterSim {
     fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
         self.sim.write_actuators(control)
     }
+
+    fn export_to_csv_header(&self) {
+        self.sim.export_to_csv_header();
+    }
+
+    fn export_to_csv(&self, tgo: i64) {
+        self.sim.export_to_csv(tgo);
+    }
 }

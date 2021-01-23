@@ -47,3 +47,8 @@ KSP:
 
 1. Start KSP and Krpc
 2. `cargo run -- ksp`
+
+**Plotting**
+
+You can pipe moon_lander's stdout to plotter.py: `cargo run -- sim | python3 plotter.py`.
+The graphs will also be saved as `output.png`.

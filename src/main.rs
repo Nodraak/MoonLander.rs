@@ -32,7 +32,8 @@ fn land(mode: Mode, adapter: &mut dyn adapters::common::Adapter) {
 
     let tgo_est = tgo_estimate(&sc, final_vel_x_goal, final_vel_y_goal, thrust_mul);
 
-    for tgo_ in 0..tgo_est {
+    // Note: stop the loop a few seconds before touchdown, to prevent guidance from diverging to +/- inf
+    for tgo_ in 0..(tgo_est-3) {
         let tgo = tgo_est-tgo_;
 
         let sensors_vals = adapter.read_sensors().unwrap();
@@ -42,6 +43,18 @@ fn land(mode: Mode, adapter: &mut dyn adapters::common::Adapter) {
         let actuators_vals = gnc::control::ctr(&mut sc, gui_out);
 
         adapter.write_actuators(actuators_vals);
+
+        if (tgo % 50) == 0 {
+            sc.export_to_csv_header();
+
+            if mode == Mode::SimFastest || mode == Mode::SimRealTime {
+                adapter.export_to_csv_header();
+            }
+        }
+        sc.export_to_csv(tgo);
+        if mode == Mode::SimFastest || mode == Mode::SimRealTime {
+            adapter.export_to_csv(tgo);
+        }
 
         // TODO break condition
 

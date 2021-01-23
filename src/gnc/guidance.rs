@@ -12,7 +12,7 @@ pub fn gui(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 
     let af_x = 0.0;
     let vf_x = 0.0;
-    let pf_x = 405_000.0;  // TODO from conf
+    let pf_x = 410_000.0;  // TODO from conf
 
     let v0_x = spacecraft.cur.vel.x;
     let p0_x = spacecraft.cur.pos.x;

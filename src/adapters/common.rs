@@ -4,6 +4,8 @@ use crate::utils::math::Vec2;
 pub trait Adapter {
     fn read_sensors(&self) -> Result<SensorsValues, &'static str>;
     fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str>;
+    fn export_to_csv_header(&self);
+    fn export_to_csv(&self, tgo: i64);
 }
 
 /// Note: Sim is 2D, KSP will project on the (velocity vector, local vertical) plane

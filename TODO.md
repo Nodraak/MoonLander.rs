@@ -14,7 +14,7 @@
         * [ok] Estimate tgo
         * [wip] At the end: is landed, and compare sim vs spacecraft
         * During sim loop: check fuel and other constraints
-    * [wip] Implement export to csv and Python plotter
+    * [ok] Implement export to csv and Python plotter
     * Implement conf settings
 2. KSP
     * [ok] Rust I/O adapters prototypes (rust for Sim, Python for Krcp) -> Adapter trait
