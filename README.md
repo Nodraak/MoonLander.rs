@@ -11,9 +11,9 @@ This repo comes with a simulator to verify the guidance before attempting a land
 
 **Overview**
 
-The plan (From https://blog.nodraak.fr/2020/08/aerospace-sim-1-preliminary-study/):
-
-![](docs/images/Architecture.svg)
+1. The plan (From https://blog.nodraak.fr/2020/08/aerospace-sim-1-preliminary-study/): ![](docs/images/Architecture.svg)
+2. The first prototype: <https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/>
+3. The final implementation: this repo
 
 **Implementation**
 
@@ -52,3 +52,14 @@ KSP:
 
 You can pipe moon_lander's stdout to plotter.py: `cargo run -- sim | python3 plotter.py`.
 The graphs will also be saved as `output.png`.
+
+Example:
+
+![](docs/images/plot.png)
+
+## Key concepts needed for landing on the Moon
+
+* GNC
+* TGO-based guidance (PID with a predesigned trajectory is flaky)
+* Take into account moon_gravity and moon_centrifugal (guidance)
+* Double cascade PID for angular control of the spacecraft with the engine
