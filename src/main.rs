@@ -1,3 +1,6 @@
+// When they are multi-lines, I like to enclose my if conditions to differentiate with the body
+#![allow(unused_parens)]
+
 mod adapters;
 mod gnc;
 mod sim;
@@ -8,6 +11,7 @@ use std::process::exit;
 use clap;
 use pyo3::prelude::*;
 use crate::gnc::common::Spacecraft;
+use crate::utils::space::{tgo_estimate, has_softly_landed};
 
 
 // TODO check rust enum
@@ -20,10 +24,16 @@ enum Mode {
 
 
 fn land(mode: Mode, adapter: &mut dyn adapters::common::Adapter) {
+    let final_vel_x_goal = 0.0;  // TODO conf
+    let final_vel_y_goal = 0.0;
+    let thrust_mul = 0.90;  // compute_tgo() assumes a 100% thrust, but on average you want the engine to run at X %
+
     let mut sc = Spacecraft::new();
 
-    for tgo_ in 0..600 {
-        let tgo = 600-tgo_;
+    let tgo_est = tgo_estimate(&sc, final_vel_x_goal, final_vel_y_goal, thrust_mul);
+
+    for tgo_ in 0..tgo_est {
+        let tgo = tgo_est-tgo_;
 
         let sensors_vals = adapter.read_sensors().unwrap();
 
@@ -38,6 +48,12 @@ fn land(mode: Mode, adapter: &mut dyn adapters::common::Adapter) {
         if mode == Mode::SimRealTime || mode == Mode::Ksp {
             // TODO sleep X ms
         }
+    }
+
+    if has_softly_landed(&sc) {
+        println!("Landing is SUCCESSFUL");
+    } else {
+        println!("Landing is FAILED");
     }
 }
 

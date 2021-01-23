@@ -8,10 +8,10 @@
     * [ok] Write some tests to verify the algorithms
     * Add fancy nav
         * [ok] Vel and pos from acc integration
-        * [wip] Mass from acc or from engine throttle
+        * [ok] Mass from acc or from engine throttle
         * Vel and pos from radar altimeter meas integration
     * Implement sim analysis loop: determine TGO, check fuel, ...
-        * [wip] Estimate tgo
+        * [ok] Estimate tgo
         * [wip] At the end: is landed, and compare sim vs spacecraft
         * During sim loop: check fuel and other constraints
     * [wip] Implement export to csv and Python plotter
