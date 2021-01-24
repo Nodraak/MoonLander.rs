@@ -8,6 +8,7 @@ mod spacecraft;
 mod utils;
 
 use std::process::exit;
+use std::{thread, time};
 use clap;
 use pyo3::prelude::*;
 use crate::gnc::common::Spacecraft;
@@ -59,7 +60,7 @@ fn land(mode: Mode, adapter: &mut dyn adapters::common::Adapter) {
         // TODO break condition
 
         if mode == Mode::SimRealTime || mode == Mode::Ksp {
-            // TODO sleep X ms
+            thread::sleep(time::Duration::from_millis(500));
         }
     }
 

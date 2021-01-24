@@ -16,7 +16,7 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
     let (ctr_sc_thrust, ctr_ang_pos) = spacecraft_controler(goal_acc, sc_mass, sc_thrust);
     let ctr_eng_gimbal = engine_controler(ctr_ang_pos, sc_mass, sc_thrust, sc_ang_pos, sc_ang_vel, eng_gimbal_cur);
 
-    spacecraft.cur.eng_throttle = ctr_sc_thrust/sc_thrust;
+    spacecraft.cur.eng_throttle = ctr_sc_thrust;
     spacecraft.cur.eng_gimbal = ctr_eng_gimbal;
 
     ActuatorsValues {
@@ -33,35 +33,35 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
 ///     spacecraft mass
 ///     engine max_thrust
 /// Output:
-///     commanded thrust (respecting engine constraints)
+///     commanded thrust (respecting engine constraints) as [0; 1] of max (nominal) thrust
 ///     commanded (ideal) (spacecraft) attitude angle
 fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f64) {
     // instead of wasting propelant, let gravity work
     if goal_acc.y < 0.0 {
         println!("WARN: gravity");
-        return (sc_thrust, PI);
-    }
+        (1.0, PI)
+    } else {
+        let mut ctr_thrust = (goal_acc.x.powi(2) + goal_acc.y.powi(2)).powf(0.5) * sc_mass;
 
-    let mut ctr_thrust = (goal_acc.x.powi(2) + goal_acc.y.powi(2)).powf(0.5) * sc_mass;
+        let mut ctr_angle;
 
-    let mut ctr_angle;
-
-    // best case, control is possible
-    if ctr_thrust < sc_thrust {
-        ctr_angle = goal_acc.y.atan2(goal_acc.x);
-    }
-    // else, try to save what can be saved (fulfill y, best effort x)
-    else {
-        println!("WARN: thrust norm {} times the available thrust", ctr_thrust/sc_thrust);
-        ctr_thrust = sc_thrust;
-
-        ctr_angle = (goal_acc.y*sc_mass/sc_thrust).asin();
-        if goal_acc.x < 0.0 {
-            ctr_angle = PI-ctr_angle;
+        // best case, control is possible
+        if ctr_thrust < sc_thrust {
+            ctr_angle = goal_acc.y.atan2(goal_acc.x);
         }
-    }
+        // else, try to save what can be saved (fulfill y, best effort x)
+        else {
+            println!("WARN: thrust norm {} times the available thrust", ctr_thrust/sc_thrust);
+            ctr_thrust = sc_thrust;
 
-    (ctr_thrust, ctr_angle)
+            ctr_angle = (goal_acc.y*sc_mass/sc_thrust).asin();
+            if goal_acc.x < 0.0 {
+                ctr_angle = PI-ctr_angle;
+            }
+        }
+
+        (ctr_thrust/sc_thrust, ctr_angle)
+    }
 }
 
 
@@ -75,7 +75,7 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
 ///     sc_mass or sc_moment_of_inertia
 ///     sc_eng_thrust, sc_eng_gimbal_current, sc_eng_gimbal_max
 /// Output:
-///     commanded (engine) gimbal_angle (respecting engine constraints)
+///     commanded (engine) gimbal_angle (respecting engine constraints) as [-1; 1] of max gimbal
 ///
 /// Double PID block diagram:
 ///
@@ -132,7 +132,7 @@ fn engine_controler(ctr_ang_pos: f64, sc_mass: f64, sc_thrust: f64, sc_ang_pos: 
 
     // return
 
-    ctr_eng_gimbal
+    ctr_eng_gimbal/max_eng_gimbal_pos
 }
 
 

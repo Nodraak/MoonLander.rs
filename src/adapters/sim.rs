@@ -28,7 +28,7 @@ fn init_() -> Result<AdapterSim, &'static str> {
 }
 
 impl Adapter for AdapterSim {
-    fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
+    fn read_sensors(&mut self) -> Result<SensorsValues, &'static str> {
         self.sim.read_sensors()
     }
 

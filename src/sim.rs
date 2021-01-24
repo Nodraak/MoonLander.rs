@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use crate::adapters::common::{SensorsValues, ActuatorsValues};
 use crate::spacecraft::{SpacecraftStatic, SpacecraftDynamic};
 use crate::utils::math::Vec2;
@@ -29,6 +31,9 @@ impl Sim {
     }
 
     pub fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
+        // TODO conf
+        let max_eng_gimbal_pos = 4.0*PI/180.0;  // 4 deg
+
         let dt = 1.0;
 
         let sc_mass = self.spec.dry_mass + self.cur.fuel_mass;
@@ -44,7 +49,7 @@ impl Sim {
         // compute torque and angular vel/pos
 
         let sc_moment_of_inertia = 0.5 * sc_mass * 2.0_f64.powi(2);  // 1/2*m*r**2 = kg.m**2
-        let torque = 8.0/2.0 * control.engine_throttle*self.spec.nominal_thrust * (control.engine_gimbal).sin();
+        let torque = 8.0/2.0 * control.engine_throttle*self.spec.nominal_thrust * (control.engine_gimbal*max_eng_gimbal_pos).sin();
         let sc_ang_acc = torque/sc_moment_of_inertia;
 
         let sc_ang_vel = self.cur.ang_vel + sc_ang_acc*dt;
