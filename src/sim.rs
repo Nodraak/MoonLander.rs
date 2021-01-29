@@ -1,14 +1,13 @@
-use std::f64::consts::PI;
-
 use crate::adapters::common::{SensorsValues, ActuatorsValues};
-use crate::spacecraft::{SpacecraftStatic, SpacecraftDynamic};
+use crate::conf::Conf;
+use crate::spacecraft::SpacecraftDynamic;
 use crate::utils::math::Vec2;
 use crate::utils::space::{moon_centrifugal, moon_gravity};
 
 
 pub struct Sim {
     dt_step: f64,
-    spec: SpacecraftStatic,         // fixed properties
+    conf: Conf,                     // spacecraft configuration / static properties
     cur: SpacecraftDynamic,         // latest changing properties
     all: Vec<SpacecraftDynamic>,    // all changing properties
 }
@@ -18,7 +17,7 @@ impl Sim {
     pub fn new(dt_step: f64) -> Sim {
         Sim {
             dt_step: dt_step,
-            spec: SpacecraftStatic::new(),
+            conf: Conf::new(),
             cur: SpacecraftDynamic::new(),
             all: vec![],
         }
@@ -34,23 +33,25 @@ impl Sim {
     }
 
     pub fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
-        // TODO conf
-        let max_eng_gimbal_pos = 4.0*PI/180.0;  // 4 deg
 
-        let sc_mass = self.spec.dry_mass + self.cur.fuel_mass;
+        let sc_mass = self.conf.sc_dry_mass + self.cur.fuel_mass;
 
         // compute t, mass
 
         let t = self.cur.t + self.dt_step;
 
-        let sc_fuel_mass = self.cur.fuel_mass - self.spec.nominal_mass_flow*control.engine_throttle*self.dt_step;
+        let sc_fuel_mass = self.cur.fuel_mass - self.conf.sc_nominal_mass_flow*control.engine_throttle*self.dt_step;
 
         // self.dv_flight += acc*self.dt_step
 
         // compute torque and angular vel/pos
 
-        let sc_moment_of_inertia = 0.5 * sc_mass * 2.0_f64.powi(2);  // 1/2*m*r**2 = kg.m**2
-        let torque = 8.0/2.0 * control.engine_throttle*self.spec.nominal_thrust * (control.engine_gimbal*max_eng_gimbal_pos).sin();
+        let sc_moment_of_inertia = 0.5 * sc_mass * (self.conf.sc_height/2.0).powi(2);  // 1/2*m*r**2 = kg.m**2
+        let torque = (
+            self.conf.sc_height/2.0
+            * control.engine_throttle*self.conf.sc_nominal_thrust
+            * (control.engine_gimbal*self.conf.control_eng_gimbal_pos_max).sin()
+        );
         let sc_ang_acc = torque/sc_moment_of_inertia;
 
         let sc_ang_vel = self.cur.ang_vel + sc_ang_acc*self.dt_step;
@@ -58,7 +59,7 @@ impl Sim {
 
         // compute thrust and acc/vel/pos
 
-        let engine_acc_norm = control.engine_throttle * self.spec.nominal_thrust/sc_mass;
+        let engine_acc_norm = control.engine_throttle * self.conf.sc_nominal_thrust/sc_mass;
         let engine_acc = Vec2::new_polar(engine_acc_norm, self.cur.ang_pos);
         let gravity_acc = Vec2 {
             x: 0.0,
@@ -100,7 +101,7 @@ impl Sim {
     }
 
     pub fn export_to_csv(&self, tgo: f64) {
-        let mass = self.spec.dry_mass + self.cur.fuel_mass;
+        let mass = self.conf.sc_dry_mass + self.cur.fuel_mass;
         println!(
             "CSV SIM;{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};",
             tgo,

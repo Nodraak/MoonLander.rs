@@ -1,19 +1,7 @@
 use std::f64::consts::PI;
 
 use crate::utils::math::Vec2;
-use crate::utils::space::G0;
 
-
-/// fixed properties
-#[derive(Debug)]
-#[derive(Clone, Copy)]
-pub struct SpacecraftStatic {
-    pub nominal_thrust: f64,            // unit: N
-    pub nominal_isp: f64,               // unit: s
-    pub nominal_mass_flow: f64,         // unit: kg/s
-
-    pub dry_mass: f64,                  // unit: kg
-}
 
 /// changing properties
 #[derive(Debug)]
@@ -33,18 +21,6 @@ pub struct SpacecraftDynamic {
     pub ang_pos: f64,                   // unit: rad
     pub ang_vel: f64,                   // unit: rad/s
     pub ang_acc: f64,                   // unit: rad/s**2
-}
-
-
-impl SpacecraftStatic {
-    pub fn new() -> SpacecraftStatic {
-        SpacecraftStatic {
-            nominal_thrust: 45_000.0,  // TODO from conf
-            nominal_isp: 311.0,  // TODO from conf
-            nominal_mass_flow: 45_000.0/(311.0*G0),  // TODO from conf - thrust/(g0*isp)
-            dry_mass: 6_800.0,  // TODO from conf
-        }
-    }
 }
 
 

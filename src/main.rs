@@ -2,6 +2,7 @@
 #![allow(unused_parens)]
 
 mod adapters;
+mod conf;
 mod gnc;
 mod sim;
 mod spacecraft;
@@ -16,13 +17,10 @@ use crate::utils::space::{tgo_estimate, has_softly_landed};
 
 
 fn land(adapter: &mut dyn adapters::common::Adapter, dt_step: f64, dt_sleep: f64) {
-    let final_vel_x_goal = 0.0;  // TODO conf
-    let final_vel_y_goal = 0.0;
-    let thrust_mul = 0.80;  // compute_tgo() assumes a 100% thrust, but on average you want the engine to run at X %
-
     let mut sc = Spacecraft::new();
 
-    let mut tgo = tgo_estimate(&sc, final_vel_x_goal, final_vel_y_goal, thrust_mul);
+    let mut tgo = tgo_estimate(&sc, sc.conf.gui_vf_x, sc.conf.gui_vf_y, sc.conf.gui_thrust_mul);
+    println!("tgo_estimate={:}", tgo);
 
     // Note: stop the loop a few seconds before touchdown, to prevent guidance from diverging to +/- inf
     while tgo > 2.0 {
@@ -39,10 +37,10 @@ fn land(adapter: &mut dyn adapters::common::Adapter, dt_step: f64, dt_sleep: f64
 
         // export
 
-        if ((tgo as u64) % 50) == 0 {
-            sc.export_to_csv_header();
-            adapter.export_to_csv_header();
-        }
+        // if ((tgo as u64) % 50) == 0 {
+        //     sc.export_to_csv_header();
+        //     adapter.export_to_csv_header();
+        // }
         sc.export_to_csv(tgo);
         adapter.export_to_csv(tgo);
 
@@ -83,8 +81,10 @@ fn main() {
 
     // handle cli args
 
-    let config = matches.value_of("config").unwrap_or("conf.json");
-    println!("Config file: {}", config);
+    // let config = matches.value_of("config").unwrap_or("conf.json");
+    // println!("Config file: {}", config);
+
+    // let conf = conf::Conf::new();  // TODO load from file, then pass to adapter
 
     match matches.subcommand() {
         ("sim", submatches) => {

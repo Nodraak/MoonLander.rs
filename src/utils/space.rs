@@ -39,7 +39,7 @@ pub fn moon_centrifugal(vel: f64, altitude: f64) -> f64 {
 /// dv_y_gravity = integral from 0 to tgo of moon_gravity()-moon_centrifugal()
 ///     Note: vx = vx0 - t*vx0/tgo = vx0/tgo * (tgo-t)
 pub fn tgo_estimate(craft: &Spacecraft, final_vel_x_goal: f64, final_vel_y_goal: f64, thrust_mul: f64) -> f64 {
-    let mass = craft.spec.dry_mass + craft.cur.fuel_mass;
+    let mass = craft.conf.sc_dry_mass + craft.cur.fuel_mass;
 
     let dv_x = craft.cur.vel.x-final_vel_x_goal;
     let dv_y_vel = craft.cur.vel.y-final_vel_y_goal;
@@ -49,7 +49,7 @@ pub fn tgo_estimate(craft: &Spacecraft, final_vel_x_goal: f64, final_vel_y_goal:
         let dv_y_gravity = tgo * (moon_gravity(craft.cur.pos.y) - (craft.cur.vel.x.powi(2)) / (3.0 * MOON_RADIUS));
         // x**2+y**2 underestimate ; x+y overestimate ; it is better to over estimate
         let dv = dv_x.abs() + (dv_y_gravity-dv_y_vel).abs();
-        tgo = mass * (1.0 - 1.0 / E.powf(dv/(craft.spec.nominal_isp*G0))) / (craft.spec.nominal_mass_flow*thrust_mul);
+        tgo = mass * (1.0 - 1.0 / E.powf(dv/(craft.conf.sc_nominal_isp*G0))) / (craft.conf.sc_nominal_mass_flow*thrust_mul);
     }
 
     tgo

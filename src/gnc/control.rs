@@ -1,20 +1,23 @@
 use std::f64::consts::PI;
 
 use crate::adapters::common::ActuatorsValues;
+use crate::conf::Conf;
 use crate::gnc::common::Spacecraft;
 use crate::utils::math::{Vec2, sign, saturate};
 
 
 /// Main control function
 pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
-    let sc_mass = spacecraft.spec.dry_mass + spacecraft.cur.fuel_mass;
-    let sc_thrust = spacecraft.spec.nominal_thrust;
+    let sc_mass = spacecraft.conf.sc_dry_mass + spacecraft.cur.fuel_mass;
+    let sc_thrust = spacecraft.conf.sc_nominal_thrust;
     let sc_ang_pos = spacecraft.cur.ang_pos;
     let sc_ang_vel = spacecraft.cur.ang_vel;
     let eng_gimbal_cur = spacecraft.cur.eng_gimbal;
 
     let (ctr_sc_thrust, ctr_ang_pos) = spacecraft_controler(goal_acc, sc_mass, sc_thrust);
-    let ctr_eng_gimbal = engine_controler(ctr_ang_pos, sc_mass, sc_thrust, sc_ang_pos, sc_ang_vel, eng_gimbal_cur);
+    let ctr_eng_gimbal = engine_controler(
+        &spacecraft.conf, ctr_ang_pos, sc_mass, sc_ang_pos, sc_ang_vel, eng_gimbal_cur,
+    );
 
     spacecraft.cur.eng_throttle = ctr_sc_thrust;
     spacecraft.cur.eng_gimbal = ctr_eng_gimbal;
@@ -95,13 +98,7 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
 ///                 |
 ///                 | ctr_ang_acc
 ///
-fn engine_controler(ctr_ang_pos: f64, sc_mass: f64, sc_thrust: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
-
-    // TODO conf
-    let max_eng_gimbal_pos = 4.0*PI/180.0;  // 4 deg
-    let max_eng_gimbal_vel = 1.0*PI/180.0;  // 1 deg/sec - apollo dps: 0.2 deg / sec (https://www.ibiblio.org/apollo/Documents/SGA_Memo04_660120.pdf)
-    let sc_width: f64 = 4.0;  // m
-    let sc_height = 8.0;  // m
+fn engine_controler(conf: &Conf, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
 
     // ang_pos_err and ctr_ang_vel - PID 1
 
@@ -116,12 +113,15 @@ fn engine_controler(ctr_ang_pos: f64, sc_mass: f64, sc_thrust: f64, sc_ang_pos: 
 
     // compute torque for correction
 
-    let sc_moment_of_inertia = 0.5 * sc_mass * (sc_width/2.0).powi(2);  // 1/2*m*r**2 = kg.m**2
+    let sc_moment_of_inertia = 0.5 * sc_mass * (conf.sc_width/2.0).powi(2);  // 1/2*m*r**2 = kg.m**2
     let ctr_torque = ctr_ang_acc * sc_moment_of_inertia;  // N*m = kg*m**2 * rad/sec**2
 
     // compute engine gimbal
 
-    let mut ctr_eng_gimbal = (ctr_torque/(sc_height/2.0*sc_thrust)).asin();  // Torque = L*F*sin(alpha)
+    let max_eng_gimbal_pos = conf.control_eng_gimbal_pos_max;
+    let max_eng_gimbal_vel = conf.control_eng_gimbal_vel_max;
+
+    let mut ctr_eng_gimbal = (ctr_torque/(conf.sc_height/2.0*conf.sc_nominal_thrust)).asin();  // Torque = L*F*sin(alpha)
     ctr_eng_gimbal = saturate(ctr_eng_gimbal, -max_eng_gimbal_pos, max_eng_gimbal_pos);
 
     let eng_gimbal_err = ctr_eng_gimbal - eng_gimbal_cur;

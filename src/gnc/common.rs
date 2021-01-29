@@ -1,8 +1,9 @@
-use crate::spacecraft::{SpacecraftStatic, SpacecraftDynamic};
+use crate::conf::Conf;
+use crate::spacecraft::SpacecraftDynamic;
 
 
 pub struct Spacecraft {
-    pub spec: SpacecraftStatic,         // fixed properties
+    pub conf: Conf,                     // spacecraft configuration / static properties
     pub cur: SpacecraftDynamic,         // latest changing properties
     pub all: Vec<SpacecraftDynamic>,    // all changing properties
 }
@@ -11,7 +12,7 @@ pub struct Spacecraft {
 impl Spacecraft {
     pub fn new() -> Spacecraft {
         Spacecraft {
-            spec: SpacecraftStatic::new(),
+            conf: Conf::new(),
             cur: SpacecraftDynamic::new(),
             all: vec![],
         }
@@ -22,7 +23,7 @@ impl Spacecraft {
     }
 
     pub fn export_to_csv(&self, tgo: f64) {
-        let mass = self.spec.dry_mass + self.cur.fuel_mass;
+        let mass = self.conf.sc_dry_mass + self.cur.fuel_mass;
         println!(
             "CSV SC;{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};",
             tgo,
