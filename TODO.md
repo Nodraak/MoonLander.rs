@@ -16,12 +16,13 @@
         * [wip] At the end: is landed, and compare sim vs spacecraft
         * During sim loop: check fuel and other constraints
     * [ok] Implement export to csv and Python plotter
-    * Implement conf settings
+    * [wip] Implement dt
+    * [wip] Implement conf settings
 2. KSP
     * [ok] Rust I/O adapters prototypes (rust for Sim, Python for Krcp) -> Adapter trait
-    * [ok?] Setup KSP addons
-    * [wip] Implement Krpc interfaces (read & write)
-    * Test whole I/O chain (read & write)
+    * [ok] Setup KSP addons
+    * [ok] Implement Krpc interfaces (read & write)
+    * [wip] Test whole I/O chain (read & write)
 3. Start Nodraak's space program on KSP
     * Update lander spec
     * Test launch (orbitial or suborbital, with or without landing)
