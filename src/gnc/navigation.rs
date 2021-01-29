@@ -3,16 +3,18 @@ use crate::gnc::common::Spacecraft;
 
 
 pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: SensorsValues) {
-    // TODO dt
+    let dt = sensors_vals.dt_step;
 
-    spacecraft.cur.fuel_mass -= spacecraft.spec.nominal_mass_flow*spacecraft.cur.eng_throttle;
+    spacecraft.cur.t += dt;
+
+    spacecraft.cur.fuel_mass -= spacecraft.spec.nominal_mass_flow*spacecraft.cur.eng_throttle*dt;
 
     spacecraft.cur.acc = sensors_vals.spacecraft_acc;
-    spacecraft.cur.vel += spacecraft.cur.acc;
-    spacecraft.cur.pos += spacecraft.cur.vel;
+    spacecraft.cur.vel += spacecraft.cur.acc*dt;
+    spacecraft.cur.pos += spacecraft.cur.vel*dt;
 
-    spacecraft.cur.ang_vel += sensors_vals.spacecraft_ang_acc;
-    spacecraft.cur.ang_pos += spacecraft.cur.ang_vel;
+    spacecraft.cur.ang_vel += sensors_vals.spacecraft_ang_acc*dt;
+    spacecraft.cur.ang_pos += spacecraft.cur.ang_vel*dt;
 
     // TODO cross check altitude - kalman filter?
 

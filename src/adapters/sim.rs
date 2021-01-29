@@ -7,8 +7,8 @@ pub struct AdapterSim {
 }
 
 
-pub fn init() -> Result<AdapterSim, &'static str> {
-    match init_() {
+pub fn init(dt_step: f64) -> Result<AdapterSim, &'static str> {
+    match init_(dt_step) {
         Err(_) => {
             println!("Error adapter::sim::init()");
             Err("Error adapter::sim::init()")
@@ -19,8 +19,8 @@ pub fn init() -> Result<AdapterSim, &'static str> {
     }
 }
 
-fn init_() -> Result<AdapterSim, &'static str> {
-    let sim = Sim::new();
+fn init_(dt_step: f64) -> Result<AdapterSim, &'static str> {
+    let sim = Sim::new(dt_step);
 
     Ok(AdapterSim {
         sim: sim,
@@ -40,7 +40,7 @@ impl Adapter for AdapterSim {
         self.sim.export_to_csv_header();
     }
 
-    fn export_to_csv(&self, tgo: i64) {
+    fn export_to_csv(&self, tgo: f64) {
         self.sim.export_to_csv(tgo);
     }
 }

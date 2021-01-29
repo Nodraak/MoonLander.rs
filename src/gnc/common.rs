@@ -21,7 +21,7 @@ impl Spacecraft {
         println!("CSV SC filtering key;tgo;eng_throttle;mass;eng_gimbal;sc_ang_acc;sc_ang_vel;sc_ang_pos;acc_x;acc_y;vel_x;vel_y;pos_x;pos_y;");
     }
 
-    pub fn export_to_csv(&self, tgo: i64) {
+    pub fn export_to_csv(&self, tgo: f64) {
         let mass = self.spec.dry_mass + self.cur.fuel_mass;
         println!(
             "CSV SC;{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};",

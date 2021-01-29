@@ -103,6 +103,7 @@ impl Adapter for AdapterKSP<'_> {
         self.last_pitch = pitch;
 
         Ok(SensorsValues {
+            dt_step: dt,
             spacecraft_acc: Vec2 {x: acc_x, y: acc_y},
             spacecraft_ang_acc: ang_acc,
             spacecraft_altitude: None,  // TODO
@@ -122,7 +123,7 @@ impl Adapter for AdapterKSP<'_> {
         // Not implemented
     }
 
-    fn export_to_csv(&self, tgo: i64) {
+    fn export_to_csv(&self, tgo: f64) {
         // Not implemented
     }
 }

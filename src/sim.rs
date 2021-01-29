@@ -7,6 +7,7 @@ use crate::utils::space::{moon_centrifugal, moon_gravity};
 
 
 pub struct Sim {
+    dt_step: f64,
     spec: SpacecraftStatic,         // fixed properties
     cur: SpacecraftDynamic,         // latest changing properties
     all: Vec<SpacecraftDynamic>,    // all changing properties
@@ -14,8 +15,9 @@ pub struct Sim {
 
 
 impl Sim {
-    pub fn new() -> Sim {
+    pub fn new(dt_step: f64) -> Sim {
         Sim {
+            dt_step: dt_step,
             spec: SpacecraftStatic::new(),
             cur: SpacecraftDynamic::new(),
             all: vec![],
@@ -24,6 +26,7 @@ impl Sim {
 
     pub fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
         Ok(SensorsValues {
+            dt_step: self.dt_step,
             spacecraft_acc: self.cur.acc,
             spacecraft_ang_acc: self.cur.ang_acc,
             spacecraft_altitude: Some(self.cur.pos.y),
@@ -34,17 +37,15 @@ impl Sim {
         // TODO conf
         let max_eng_gimbal_pos = 4.0*PI/180.0;  // 4 deg
 
-        let dt = 1.0;
-
         let sc_mass = self.spec.dry_mass + self.cur.fuel_mass;
 
         // compute t, mass
 
-        let t = self.cur.t + dt;
+        let t = self.cur.t + self.dt_step;
 
-        let sc_fuel_mass = self.cur.fuel_mass - self.spec.nominal_mass_flow*control.engine_throttle*dt;
+        let sc_fuel_mass = self.cur.fuel_mass - self.spec.nominal_mass_flow*control.engine_throttle*self.dt_step;
 
-        // self.dv_flight += acc*dt
+        // self.dv_flight += acc*self.dt_step
 
         // compute torque and angular vel/pos
 
@@ -52,8 +53,8 @@ impl Sim {
         let torque = 8.0/2.0 * control.engine_throttle*self.spec.nominal_thrust * (control.engine_gimbal*max_eng_gimbal_pos).sin();
         let sc_ang_acc = torque/sc_moment_of_inertia;
 
-        let sc_ang_vel = self.cur.ang_vel + sc_ang_acc*dt;
-        let sc_ang_pos = self.cur.ang_pos + sc_ang_vel*dt;
+        let sc_ang_vel = self.cur.ang_vel + sc_ang_acc*self.dt_step;
+        let sc_ang_pos = self.cur.ang_pos + sc_ang_vel*self.dt_step;
 
         // compute thrust and acc/vel/pos
 
@@ -68,8 +69,8 @@ impl Sim {
         let sc_acc = engine_acc + gravity_acc;
         // self.g = self.acc_y/G0
 
-        let sc_vel = self.cur.vel + sc_acc*dt;
-        let sc_pos = self.cur.pos + sc_vel*dt;
+        let sc_vel = self.cur.vel + sc_acc*self.dt_step;
+        let sc_pos = self.cur.pos + sc_vel*self.dt_step;
 
         // save everything
 
@@ -98,7 +99,7 @@ impl Sim {
         println!("CSV SIM filtering key;tgo;eng_throttle;mass;eng_gimbal;sc_ang_acc;sc_ang_vel;sc_ang_pos;acc_x;acc_y;vel_x;vel_y;pos_x;pos_y;");
     }
 
-    pub fn export_to_csv(&self, tgo: i64) {
+    pub fn export_to_csv(&self, tgo: f64) {
         let mass = self.spec.dry_mass + self.cur.fuel_mass;
         println!(
             "CSV SIM;{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};",
