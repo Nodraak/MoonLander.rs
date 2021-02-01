@@ -3,6 +3,7 @@
 import sys
 from math import pi
 from matplotlib import pyplot as plt
+import numpy as np
 
 
 MATPLOTLIB_FIGSIZE = (2*6.4, 2*4.8)
@@ -43,6 +44,12 @@ def subplot_plot_quadruple_curves(
     legend1a, legend1b, legend2a, legend2b,
     last_t, horiz=False,
 ):
+    assert len(data1a) == len(data1b)
+    assert len(data1a) == len(data2a)
+    assert len(data1a) == len(data2b)
+
+    xs = np.linspace(0, last_t, len(data1a))
+
     # set ax1 and ax2
 
     ax1 = plt.subplot(PLOT_ROWS, PLOT_COLS, plot_id)
@@ -51,8 +58,8 @@ def subplot_plot_quadruple_curves(
     ax1.yaxis.label.set_color('blue')
 
     ax1.tick_params(axis='y', labelcolor='blue')
-    (handle_1a, ) = ax1.plot(data1a, color='blue')
-    (handle_1b, ) = ax1.plot(data1b, color='darkblue')
+    (handle_1a, ) = ax1.plot(xs, data1a, color='blue')
+    (handle_1b, ) = ax1.plot(xs, data1b, color='darkblue')
 
     ax2 = ax1.twinx()
 
@@ -60,8 +67,8 @@ def subplot_plot_quadruple_curves(
     ax2.yaxis.label.set_color('red')
 
     ax2.tick_params(axis='y', labelcolor='red')
-    (handle_2a, ) = ax2.plot(data2a, color='red')
-    (handle_2b, ) = ax2.plot(data2b, color='darkred')
+    (handle_2a, ) = ax2.plot(xs, data2a, color='red')
+    (handle_2b, ) = ax2.plot(xs, data2b, color='darkred')
 
     # set xlim
 
