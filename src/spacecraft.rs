@@ -1,5 +1,4 @@
-use std::f64::consts::PI;
-
+use crate::conf::Conf;
 use crate::utils::math::Vec2;
 
 
@@ -25,20 +24,20 @@ pub struct SpacecraftDynamic {
 
 
 impl SpacecraftDynamic {
-    pub fn new() -> SpacecraftDynamic {
+    pub fn new(conf: &Conf) -> SpacecraftDynamic {
         SpacecraftDynamic {
             t: 0.0,
 
             eng_gimbal: 0.0,
             eng_throttle: 0.0,
 
-            fuel_mass: 8400.0,  // TODO from conf
+            fuel_mass: conf.initial_sc_fuel_mass,
 
-            pos: Vec2 {x: 0.0, y: 15_000.0},  // TODO from conf
-            vel: Vec2 {x: 1673.0, y: 0.0},  // TODO from conf - (MOON_MU/(MOON_RADIUS+15_000))**.5
+            pos: conf.initial_sc_pos,
+            vel: conf.initial_sc_vel,
             acc: Vec2 {x: 0.0, y: 0.0},
 
-            ang_pos: 180.0*PI/180.0,
+            ang_pos: conf.initial_sc_ang_pos,
             ang_vel: 0.0,
             ang_acc: 0.0,
         }

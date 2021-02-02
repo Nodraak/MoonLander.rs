@@ -10,10 +10,10 @@ pub struct Spacecraft {
 
 
 impl Spacecraft {
-    pub fn new() -> Spacecraft {
+    pub fn new(conf: Conf) -> Spacecraft {
         Spacecraft {
-            conf: Conf::new(),
-            cur: SpacecraftDynamic::new(),
+            conf: conf,
+            cur: SpacecraftDynamic::new(&conf),
             all: vec![],
         }
     }

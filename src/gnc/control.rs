@@ -118,8 +118,8 @@ fn engine_controler(conf: &Conf, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64
 
     // compute engine gimbal
 
-    let max_eng_gimbal_pos = conf.control_eng_gimbal_pos_max;
-    let max_eng_gimbal_vel = conf.control_eng_gimbal_vel_max;
+    let max_eng_gimbal_pos = conf.ctr_eng_gimbal_pos_max;
+    let max_eng_gimbal_vel = conf.ctr_eng_gimbal_vel_max;
 
     let mut ctr_eng_gimbal = (ctr_torque/(conf.sc_height/2.0*conf.sc_nominal_thrust)).asin();  // Torque = L*F*sin(alpha)
     ctr_eng_gimbal = saturate(ctr_eng_gimbal, -max_eng_gimbal_pos, max_eng_gimbal_pos);

@@ -6,7 +6,6 @@ use crate::utils::space::{moon_centrifugal, moon_gravity};
 
 
 pub struct Sim {
-    dt_step: f64,
     conf: Conf,                     // spacecraft configuration / static properties
     cur: SpacecraftDynamic,         // latest changing properties
     all: Vec<SpacecraftDynamic>,    // all changing properties
@@ -14,18 +13,17 @@ pub struct Sim {
 
 
 impl Sim {
-    pub fn new(dt_step: f64) -> Sim {
+    pub fn new(conf: Conf) -> Sim {
         Sim {
-            dt_step: dt_step,
-            conf: Conf::new(),
-            cur: SpacecraftDynamic::new(),
+            conf: conf,
+            cur: SpacecraftDynamic::new(&conf),
             all: vec![],
         }
     }
 
     pub fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
         Ok(SensorsValues {
-            dt_step: self.dt_step,
+            dt_step: self.conf.dt_step,
             spacecraft_acc: self.cur.acc,
             spacecraft_ang_acc: self.cur.ang_acc,
             spacecraft_altitude: Some(self.cur.pos.y),
@@ -33,16 +31,16 @@ impl Sim {
     }
 
     pub fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
-
+        let dt = self.conf.dt_step;
         let sc_mass = self.conf.sc_dry_mass + self.cur.fuel_mass;
 
         // compute t, mass
 
-        let t = self.cur.t + self.dt_step;
+        let t = self.cur.t + dt;
 
-        let sc_fuel_mass = self.cur.fuel_mass - self.conf.sc_nominal_mass_flow*control.engine_throttle*self.dt_step;
+        let sc_fuel_mass = self.cur.fuel_mass - self.conf.sc_nominal_mass_flow*control.engine_throttle*dt;
 
-        // self.dv_flight += acc*self.dt_step
+        // self.dv_flight += acc*dt
 
         // compute torque and angular vel/pos
 
@@ -50,12 +48,12 @@ impl Sim {
         let torque = (
             self.conf.sc_height/2.0
             * control.engine_throttle*self.conf.sc_nominal_thrust
-            * (control.engine_gimbal*self.conf.control_eng_gimbal_pos_max).sin()
+            * (control.engine_gimbal*self.conf.ctr_eng_gimbal_pos_max).sin()
         );
         let sc_ang_acc = torque/sc_moment_of_inertia;
 
-        let sc_ang_vel = self.cur.ang_vel + sc_ang_acc*self.dt_step;
-        let sc_ang_pos = self.cur.ang_pos + sc_ang_vel*self.dt_step;
+        let sc_ang_vel = self.cur.ang_vel + sc_ang_acc*dt;
+        let sc_ang_pos = self.cur.ang_pos + sc_ang_vel*dt;
 
         // compute thrust and acc/vel/pos
 
@@ -70,8 +68,8 @@ impl Sim {
         let sc_acc = engine_acc + gravity_acc;
         // self.g = self.acc_y/G0
 
-        let sc_vel = self.cur.vel + sc_acc*self.dt_step;
-        let sc_pos = self.cur.pos + sc_vel*self.dt_step;
+        let sc_vel = self.cur.vel + sc_acc*dt;
+        let sc_pos = self.cur.pos + sc_vel*dt;
 
         // save everything
 

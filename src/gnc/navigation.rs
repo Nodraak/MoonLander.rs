@@ -2,7 +2,7 @@ use crate::adapters::common::SensorsValues;
 use crate::gnc::common::Spacecraft;
 
 
-pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: SensorsValues) {
+pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: &SensorsValues) {
     let dt = sensors_vals.dt_step;
 
     spacecraft.cur.t += dt;

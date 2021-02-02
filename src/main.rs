@@ -12,12 +12,13 @@ use std::process::exit;
 use std::{thread, time};
 use clap;
 use pyo3::prelude::*;
+use crate::conf::Conf;
 use crate::gnc::common::Spacecraft;
 use crate::utils::space::{tgo_estimate, has_softly_landed};
 
 
-fn land(adapter: &mut dyn adapters::common::Adapter, dt_step: f64, dt_sleep: f64) {
-    let mut sc = Spacecraft::new();
+fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
+    let mut sc = Spacecraft::new(conf);
 
     let mut tgo = tgo_estimate(&sc, sc.conf.gui_vf_x, sc.conf.gui_vf_y, sc.conf.gui_thrust_mul);
     println!("tgo_estimate={:}", tgo);
@@ -29,7 +30,7 @@ fn land(adapter: &mut dyn adapters::common::Adapter, dt_step: f64, dt_sleep: f64
 
         let sensors_vals = adapter.read_sensors().unwrap();
 
-        gnc::navigation::nav(&mut sc, sensors_vals);
+        gnc::navigation::nav(&mut sc, &sensors_vals);
         let gui_out = gnc::guidance::gui(&sc, tgo);
         let actuators_vals = gnc::control::ctr(&mut sc, gui_out);
 
@@ -46,8 +47,8 @@ fn land(adapter: &mut dyn adapters::common::Adapter, dt_step: f64, dt_sleep: f64
 
         // time
 
-        tgo -= dt_step;
-        thread::sleep(time::Duration::from_millis((dt_sleep*1000.0) as u64));
+        tgo -= sensors_vals.dt_step;
+        thread::sleep(time::Duration::from_millis((conf.dt_sleep*1000.0) as u64));
     }
 
     if has_softly_landed(&sc) {
@@ -91,24 +92,26 @@ fn main() {
             println!("Subcommand: sim");
 
             let dt_step = 0.100;
-            let dt_sleep = 0.0;
 
-            let mut adapter = adapters::sim::init(dt_step).unwrap();  // TODO handle error
+            let conf = Conf::new(dt_step, 0.0);
 
-            land(&mut adapter, dt_step, dt_sleep);
+            let mut adapter = adapters::sim::init(conf).unwrap();  // TODO handle error
+
+            land(&mut adapter, conf);
         },
         ("ksp", submatches) => {
             println!("Subcommand: ksp");
 
-            let dt_step = 0.100;
             let dt_sleep = 0.500;
 
             let gil = Python::acquire_gil();
             let py = gil.python();
 
+            let conf = Conf::new(0.0, dt_sleep);
+
             let mut adapter = adapters::ksp::init(&py).unwrap();  // TODO handle error
 
-            land(&mut adapter, dt_step, dt_sleep);
+            land(&mut adapter, conf);
         },
         _ => {
             println!("Error: expected SubCommand: sim|ksp");

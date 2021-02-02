@@ -1,4 +1,5 @@
 use crate::adapters::common::{Adapter, SensorsValues, ActuatorsValues};
+use crate::conf::Conf;
 use crate::sim::Sim;
 
 
@@ -7,8 +8,8 @@ pub struct AdapterSim {
 }
 
 
-pub fn init(dt_step: f64) -> Result<AdapterSim, &'static str> {
-    match init_(dt_step) {
+pub fn init(conf: Conf) -> Result<AdapterSim, &'static str> {
+    match init_(conf) {
         Err(_) => {
             println!("Error adapter::sim::init()");
             Err("Error adapter::sim::init()")
@@ -19,8 +20,8 @@ pub fn init(dt_step: f64) -> Result<AdapterSim, &'static str> {
     }
 }
 
-fn init_(dt_step: f64) -> Result<AdapterSim, &'static str> {
-    let sim = Sim::new(dt_step);
+fn init_(conf: Conf) -> Result<AdapterSim, &'static str> {
+    let sim = Sim::new(conf);
 
     Ok(AdapterSim {
         sim: sim,
