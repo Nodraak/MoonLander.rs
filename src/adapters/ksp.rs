@@ -93,7 +93,7 @@ impl Adapter for AdapterKSP<'_> {
 
         let acc_x = (vel_horiz-self.last_vel_horiz)/dt;
         let acc_y = (vel_vert-self.last_vel_vert)/dt;
-        let ang_acc = (pitch-self.last_pitch)/dt * PI/180.0;
+        let ang_acc = (pitch-self.last_pitch)/dt * PI/180.0;  // KSP pitch is in deg, convert to rad
 
         // Update internal state and return
 

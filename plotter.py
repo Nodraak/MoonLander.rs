@@ -34,8 +34,8 @@ class SpacecraftData:
         self.pos_y = []
 
 
-def rad2deg(degs):
-    return [d*180/pi for d in degs]
+def rad2deg(rads):
+    return [r*180/pi for r in rads]
 
 
 def subplot_plot_quadruple_curves(
@@ -92,8 +92,8 @@ def plot_all(sc_data, sim_data, save_to_file=None):
     )
 
     subplot_plot_quadruple_curves(
-        2, 'gimbal (deg)', 'ang acc (deg/sec**2)',
-        rad2deg(sc_data.eng_gimbal), rad2deg(sim_data.eng_gimbal), rad2deg(sc_data.ang_acc), rad2deg(sim_data.ang_acc),
+        2, 'gimbal pos (deg)', 'gimbal vel (deg/sec)',
+        rad2deg(sc_data.eng_gimbal), rad2deg(sim_data.eng_gimbal), rad2deg(sc_data.eng_gimbal_vel), rad2deg(sim_data.eng_gimbal_vel),
         'sc', 'sim', 'sc', 'sim',
         sc_data.tgo[0],
         horiz=True,
@@ -180,7 +180,10 @@ def main():
         else:
             continue
 
-    print('Read and parsed all data, plotting')
+    sc_data.eng_gimbal_vel = [0] + list(np.diff(sc_data.eng_gimbal))
+    sim_data.eng_gimbal_vel = [0] + list(np.diff(sim_data.eng_gimbal))
+
+    print('Read and parsed all data, plotting - len=%d' % len(sc_data.tgo))
 
     plot_all(sc_data, sim_data, save_to_file='./output.png')
 

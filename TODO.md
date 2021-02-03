@@ -17,7 +17,7 @@
     * Implement sim analysis loop: determine TGO, check fuel, ...
         * [ok] Estimate tgo
         * [wip] At the end: is landed, and compare sim vs spacecraft
-        * During sim loop: check fuel and other constraints
+        * [wip] During sim loop: check fuel and other constraints (angles)
     * [ok] Implement export to csv and Python plotter
     * [ok] Implement dt
     * [ok] Implement conf settings
