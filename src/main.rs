@@ -36,6 +36,10 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
 
         adapter.write_actuators(actuators_vals);
 
+        // quick check internal state
+
+        sc.check_state();
+
         // export
 
         // if ((tgo as u64) % 50) == 0 {
