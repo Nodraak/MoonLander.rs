@@ -12,7 +12,7 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
     let sc_thrust = spacecraft.conf.sc_nominal_thrust;
     let sc_ang_pos = spacecraft.cur.ang_pos;
     let sc_ang_vel = spacecraft.cur.ang_vel;
-    let eng_gimbal_cur = spacecraft.cur.eng_gimbal;
+    let eng_gimbal_cur = spacecraft.cur.eng_gimbal*spacecraft.conf.ctr_eng_gimbal_pos_max;
 
     let (ctr_sc_thrust, ctr_ang_pos) = spacecraft_controler(goal_acc, sc_mass, sc_thrust);
     let ctr_eng_gimbal = engine_controler(
@@ -20,7 +20,7 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
     );
 
     spacecraft.cur.eng_throttle = ctr_sc_thrust;
-    spacecraft.cur.eng_gimbal = ctr_eng_gimbal;
+    spacecraft.cur.eng_gimbal = ctr_eng_gimbal / spacecraft.conf.ctr_eng_gimbal_pos_max;
 
     ActuatorsValues {
         engine_throttle: spacecraft.cur.eng_throttle,
@@ -132,7 +132,7 @@ fn engine_controler(conf: &Conf, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64
 
     // return
 
-    ctr_eng_gimbal/max_eng_gimbal_pos
+    ctr_eng_gimbal
 }
 
 

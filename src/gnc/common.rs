@@ -29,7 +29,7 @@ impl Spacecraft {
             tgo,
             self.cur.eng_throttle,
             mass,
-            self.cur.eng_gimbal,
+            self.cur.eng_gimbal*self.conf.ctr_eng_gimbal_pos_max,
             self.cur.ang_acc,
             self.cur.ang_vel,
             self.cur.ang_pos,
