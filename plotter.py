@@ -40,15 +40,14 @@ def rad2deg(rads):
 
 def subplot_plot_quadruple_curves(
     plot_id, ylabel1, ylabel2,
-    data1a, data1b, data2a, data2b,
+    xs, data1a, data1b, data2a, data2b,
     legend1a, legend1b, legend2a, legend2b,
-    last_t, horiz=False,
+    horiz=False,
 ):
-    assert len(data1a) == len(data1b)
-    assert len(data1a) == len(data2a)
-    assert len(data1a) == len(data2b)
-
-    xs = np.linspace(0, last_t, len(data1a))
+    assert len(xs) == len(data1a)
+    assert len(xs) == len(data1b)
+    assert len(xs) == len(data2a)
+    assert len(xs) == len(data2b)
 
     # set ax1 and ax2
 
@@ -72,62 +71,58 @@ def subplot_plot_quadruple_curves(
 
     # set xlim
 
-    plt.xlim((0, last_t))
+    plt.xlim((xs[0], xs[-1]))
 
     # set horiz line
 
     if horiz:
-        ax1.hlines(0, 0, last_t, color='lightsteelblue')
-        ax2.hlines(0, 0, last_t, color='lightcoral')
+        ax1.hlines(0, xs[0], xs[-1], color='lightsteelblue')
+        ax2.hlines(0, xs[0], xs[-1], color='lightcoral')
 
 
 def plot_all(sc_data, sim_data, save_to_file=None):
     plt.figure(figsize=MATPLOTLIB_FIGSIZE)
 
+    xs = [sc_data.tgo[0]-t for t in sc_data.tgo]
+
     subplot_plot_quadruple_curves(
         1, 'eng_throttle (0-1)', 'mass (kg)',
-        sc_data.eng_throttle, sim_data.eng_throttle, sc_data.mass, sim_data.mass,
+        xs, sc_data.eng_throttle, sim_data.eng_throttle, sc_data.mass, sim_data.mass,
         'sc', 'sim', 'sc', 'sim',
-        sc_data.tgo[0],
     )
 
     subplot_plot_quadruple_curves(
         2, 'gimbal pos (deg)', 'gimbal vel (deg/sec)',
-        rad2deg(sc_data.eng_gimbal), rad2deg(sim_data.eng_gimbal), rad2deg(sc_data.eng_gimbal_vel), rad2deg(sim_data.eng_gimbal_vel),
+        xs, rad2deg(sc_data.eng_gimbal), rad2deg(sim_data.eng_gimbal), rad2deg(sc_data.eng_gimbal_vel), rad2deg(sim_data.eng_gimbal_vel),
         'sc', 'sim', 'sc', 'sim',
-        sc_data.tgo[0],
         horiz=True,
     )
 
     subplot_plot_quadruple_curves(
         3, 'ang vel (deg/sec)', 'ang pos (deg)',
-        rad2deg(sc_data.ang_vel), rad2deg(sim_data.ang_vel), rad2deg(sc_data.ang_pos), rad2deg(sim_data.ang_pos),
+        xs, rad2deg(sc_data.ang_vel), rad2deg(sim_data.ang_vel), rad2deg(sc_data.ang_pos), rad2deg(sim_data.ang_pos),
         'sc', 'sim', 'sc', 'sim',
-        sc_data.tgo[0],
         horiz=True,
     )
 
     subplot_plot_quadruple_curves(
         4, 'acc x (m/sec**2)', 'acc y (m/sec**2)',
-        sc_data.acc_x, sim_data.acc_x, sc_data.acc_y, sim_data.acc_y,
+        xs, sc_data.acc_x, sim_data.acc_x, sc_data.acc_y, sim_data.acc_y,
         'sc', 'sim', 'sc', 'sim',
-        sc_data.tgo[0],
         horiz=True,
     )
 
     subplot_plot_quadruple_curves(
         5, 'vel x (m/sec)', 'vel y (m/sec)',
-        sc_data.vel_x, sim_data.vel_x, sc_data.vel_y, sim_data.vel_y,
+        xs, sc_data.vel_x, sim_data.vel_x, sc_data.vel_y, sim_data.vel_y,
         'sc', 'sim', 'sc', 'sim',
-        sc_data.tgo[0],
         horiz=True,
     )
 
     subplot_plot_quadruple_curves(
         6, 'pos x (m)', 'pos y (m)',
-        sc_data.pos_x, sim_data.pos_x, sc_data.pos_y, sim_data.pos_y,
+        xs, sc_data.pos_x, sim_data.pos_x, sc_data.pos_y, sim_data.pos_y,
         'sc', 'sim', 'sc', 'sim',
-        sc_data.tgo[0],
         horiz=True,
     )
 
