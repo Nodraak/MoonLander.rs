@@ -7,7 +7,7 @@ use crate::utils::spacecraft::SpacecraftDynamic;
 
 
 pub struct Sim {
-    dt_step: f64,
+    dt: f64,
     conf: Scenario,                 // spacecraft configuration / static properties
     cur: SpacecraftDynamic,         // latest changing properties
     all: Vec<SpacecraftDynamic>,    // all changing properties
@@ -17,7 +17,7 @@ pub struct Sim {
 impl Sim {
     pub fn new(conf: Conf) -> Sim {
         Sim {
-            dt_step: conf.dt_step,
+            dt: conf.dt_step,
             conf: conf.s,
             cur: SpacecraftDynamic::new(&conf.s),
             all: vec![],
@@ -26,7 +26,7 @@ impl Sim {
 
     pub fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
         Ok(SensorsValues {
-            dt_step: self.dt_step,
+            dt_step: self.dt,
             spacecraft_acc: self.cur.acc,
             spacecraft_ang_acc: self.cur.ang_acc,
             spacecraft_altitude: Some(self.cur.pos.y),
@@ -34,7 +34,7 @@ impl Sim {
     }
 
     pub fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
-        let dt = self.dt_step;
+        let dt = self.dt;
         let sc_mass = self.conf.sc_dry_mass + self.cur.fuel_mass;
 
         // compute t, mass

@@ -1,3 +1,4 @@
+use std::f64::consts::PI;
 use std::ops::{Add, Sub, AddAssign, Mul};
 
 use serde::{Serialize, Deserialize};
@@ -67,6 +68,11 @@ impl Mul<f64> for Vec2 {
             y: self.y * other,
         }
     }
+}
+
+
+pub fn deg2rad(deg: f64) -> f64 {
+    deg*PI/180.0
 }
 
 

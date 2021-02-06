@@ -12,19 +12,29 @@ use std::{thread, time};
 use clap;
 use serde_yaml;
 use pyo3::prelude::*;
-use crate::conf::{Scenario, Conf};
+use crate::conf::{Scenario, Conf, TgoEstimate, SubCommand};
 use crate::gnc::common::Spacecraft;
 use crate::utils::space::{tgo_estimate, has_softly_landed};
 
 
 fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
-    let mut sc = Spacecraft::new(conf.s);
+    let mut sc = Spacecraft::new(conf);
 
-    let mut tgo = tgo_estimate(&sc, sc.conf.gui_vf_x, sc.conf.gui_vf_y, sc.conf.gui_thrust_mul);
-    println!("tgo_estimate={:}", tgo);
+    let mut tgo = match conf.s.tgo_method {
+        TgoEstimate::TgoGivenFixed => {
+            conf.s.tgo_init
+        },
+        TgoEstimate::TgoEstimateFixed | TgoEstimate::TgoEstimateUpdating => {
+            tgo_estimate(&sc, sc.conf.s.gui_vf_x, sc.conf.s.gui_vf_y, sc.conf.s.tgo_thrust_mul)
+        }
+    };
+    println!("tgo init = {:}", tgo);
 
-    // Note: stop the loop a few seconds before touchdown, to prevent guidance from diverging to +/- inf
-    while tgo > 5.0 {
+    loop {
+
+        if conf.s.tgo_method == TgoEstimate::TgoEstimateUpdating {
+            tgo = tgo_estimate(&sc, sc.conf.s.gui_vf_x, sc.conf.s.gui_vf_y, sc.conf.s.tgo_thrust_mul);
+        }
 
         // inputs, gnc, outputs
 
@@ -44,6 +54,12 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
 
         sc.export_to_csv(tgo);
         adapter.export_to_csv(tgo);
+
+        // Stop the loop a few seconds before touchdown, to prevent guidance from diverging to +/- inf
+
+        if tgo < conf.s.tgo_stop {
+            break;
+        }
 
         // time
 
@@ -92,7 +108,7 @@ fn main() {
 
             let dt_step = 0.100;
 
-            let conf = Conf::new(dt_step, 0.0, scenario);
+            let conf = Conf::new(SubCommand::Sim, dt_step, 0.0, scenario);
 
             let mut adapter = adapters::sim::init(conf).unwrap();  // TODO handle error
 
@@ -106,7 +122,7 @@ fn main() {
             let gil = Python::acquire_gil();
             let py = gil.python();
 
-            let conf = Conf::new(0.0, dt_sleep, scenario);
+            let conf = Conf::new(SubCommand::Ksp, 0.0, dt_sleep, scenario);
 
             let mut adapter = adapters::ksp::init(&py).unwrap();  // TODO handle error
 

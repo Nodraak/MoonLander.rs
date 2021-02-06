@@ -21,8 +21,9 @@
     * [ok] Implement export to csv and Python plotter
     * [ok] Implement dt
     * [ok] Implement conf settings + load from yaml
-    * [wip] Refacto gui to allow several guidance methods (tgo landing, tgo ascent, fixed ascent)
+    * [ok] Refacto gui to allow several guidance methods (tgo landing, tgo ascent, fixed ascent)
     * [ok] Spacecraft angle / Engine gimbal PID
+    * Rework sim to use 3D coordinates (simple PID to nullify the 3rd dimension?)
 2. KSP
     * [ok] Rust I/O adapters prototypes (rust for Sim, Python for Krcp) -> Adapter trait
     * [ok] Setup KSP addons
