@@ -11,14 +11,15 @@ mod utils;
 use std::process::exit;
 use std::{thread, time};
 use clap;
+use serde_yaml;
 use pyo3::prelude::*;
-use crate::conf::Conf;
+use crate::conf::{Scenario, Conf};
 use crate::gnc::common::Spacecraft;
 use crate::utils::space::{tgo_estimate, has_softly_landed};
 
 
 fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
-    let mut sc = Spacecraft::new(conf);
+    let mut sc = Spacecraft::new(conf.s);
 
     let mut tgo = tgo_estimate(&sc, sc.conf.gui_vf_x, sc.conf.gui_vf_y, sc.conf.gui_thrust_mul);
     println!("tgo_estimate={:}", tgo);
@@ -72,6 +73,7 @@ fn main() {
             .short("c")
             .long("config")
             .help("Specify a config file")
+            .default_value("conf/default.yaml")
             .takes_value(true)
         )
         .subcommand(
@@ -86,10 +88,8 @@ fn main() {
 
     // handle cli args
 
-    // let config = matches.value_of("config").unwrap_or("conf.json");
-    // println!("Config file: {}", config);
-
-    // let conf = conf::Conf::new();  // TODO load from file, then pass to adapter
+    let f = std::fs::File::open(matches.value_of("config").unwrap()).unwrap();
+    let scenario: Scenario = serde_yaml::from_reader(f).unwrap();
 
     match matches.subcommand() {
         ("sim", submatches) => {
@@ -97,7 +97,7 @@ fn main() {
 
             let dt_step = 0.100;
 
-            let conf = Conf::new(dt_step, 0.0);
+            let conf = Conf::new(dt_step, 0.0, scenario);
 
             let mut adapter = adapters::sim::init(conf).unwrap();  // TODO handle error
 
@@ -111,7 +111,7 @@ fn main() {
             let gil = Python::acquire_gil();
             let py = gil.python();
 
-            let conf = Conf::new(0.0, dt_sleep);
+            let conf = Conf::new(0.0, dt_sleep, scenario);
 
             let mut adapter = adapters::ksp::init(&py).unwrap();  // TODO handle error
 

@@ -20,7 +20,7 @@
         * [ok] During sim loop: check fuel and other constraints (angles)
     * [ok] Implement export to csv and Python plotter
     * [ok] Implement dt
-    * [ok] Implement conf settings
+    * [ok] Implement conf settings + load from yaml
     * [wip] Refacto gui to allow several guidance methods (tgo landing, tgo ascent, fixed ascent)
     * [ok] Spacecraft angle / Engine gimbal PID
 2. KSP

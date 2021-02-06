@@ -1,4 +1,4 @@
-use crate::conf::Conf;
+use crate::conf::Scenario;
 use crate::utils::math::Vec2;
 
 
@@ -24,7 +24,7 @@ pub struct SpacecraftDynamic {
 
 
 impl SpacecraftDynamic {
-    pub fn new(conf: &Conf) -> SpacecraftDynamic {
+    pub fn new(conf: &Scenario) -> SpacecraftDynamic {
         SpacecraftDynamic {
             t: 0.0,
 

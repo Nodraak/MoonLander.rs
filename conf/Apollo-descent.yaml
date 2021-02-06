@@ -1,0 +1,31 @@
+#
+# Apollo descent
+#
+
+initial_sc_pos: [-420000.0, 15000.0]
+initial_sc_vel: [1673.0, 0.0]
+initial_sc_ang_pos: 3.141593  # 180 = horiz
+initial_sc_fuel_mass: 8400.0
+
+sc_width: 4.0
+sc_height: 8.0
+sc_dry_mass: 6800.0
+
+sc_nominal_thrust: 45000.0
+sc_nominal_isp: 311.0
+sc_nominal_mass_flow: 14.754736  # 45_000.0/(311.0*G0)
+
+gui_af_x: 0.0
+gui_vf_x: 0.0
+gui_pf_x: 0.0
+
+gui_af_y: 0.0
+gui_vf_y: -1.0
+gui_pf_y: 1.0
+
+gui_thrust_mul: 0.80
+
+ctr_eng_gimbal_pos_max: 0.069813  # 4 deg
+
+# Apollo dps: 0.2 deg / sec (https://www.ibiblio.org/apollo/Documents/SGA_Memo04_660120.pdf)
+ctr_eng_gimbal_vel_max: 0.017453  # 1 deg

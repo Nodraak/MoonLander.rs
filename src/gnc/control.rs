@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 
 use crate::adapters::common::ActuatorsValues;
-use crate::conf::Conf;
+use crate::conf::Scenario;
 use crate::gnc::common::Spacecraft;
 use crate::utils::math::{Vec2, sign, saturate};
 
@@ -80,7 +80,7 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
 /// Output:
 ///     commanded (engine) gimbal_angle (respecting engine constraints) as [-1; 1] of max gimbal
 ///
-fn engine_controler(conf: &Conf, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
+fn engine_controler(conf: &Scenario, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
     // ang PID, I=0, D using dpos' = -vel
     let KP = 0.2;
     let KD = 1.0;

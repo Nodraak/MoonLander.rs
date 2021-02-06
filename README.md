@@ -28,8 +28,8 @@ I/O will be implemented via adapters (to be able to swap between the simulator a
 
 **Dependencies**
 
-* Rust
-* For KSP subcommand
+* Rust (and a few crates)
+* For the `ksp` subcommand:
     * KSP game
     * Krpc addon: `sudo pip3 install krpc`
 
@@ -41,16 +41,17 @@ I/O will be implemented via adapters (to be able to swap between the simulator a
 
 Sim:
 
-1. `cargo run -- sim`
+1. `cargo run -- -c conf/Apollo-descent.yaml sim`
 
 KSP:
 
 1. Start KSP and Krpc
-2. `cargo run -- ksp`
+2. `cargo run -- -c conf/Apollo-descent.yaml ksp`
 
 **Plotting**
 
-You can pipe moon_lander's stdout to plotter.py: `cargo run -- sim | python3 plotter.py`.
+You can pipe moon_lander's stdout to plotter.py: `cargo run -- -c conf/Apollo-descent.yaml sim | py plotter.py `.
+It will run MoonLander, then show some curves.
 The graphs will also be saved as `output.png`.
 
 Example:

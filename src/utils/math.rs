@@ -1,8 +1,11 @@
 use std::ops::{Add, AddAssign, Mul};
 
+use serde::{Serialize, Deserialize};
+
 
 #[derive(Debug)]
 #[derive(Clone, Copy)]
+#[derive(Serialize, Deserialize)]
 pub struct Vec2 {
     pub x: f64,  // horizontal axis
     pub y: f64,  // vertical axis

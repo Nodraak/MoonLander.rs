@@ -1,18 +1,18 @@
 use std::f64::consts::PI;
 
-use crate::conf::Conf;
+use crate::conf::Scenario;
 use crate::spacecraft::SpacecraftDynamic;
 
 
 pub struct Spacecraft {
-    pub conf: Conf,                     // spacecraft configuration / static properties
+    pub conf: Scenario,                 // spacecraft configuration / static properties
     pub cur: SpacecraftDynamic,         // latest changing properties
     pub all: Vec<SpacecraftDynamic>,    // all changing properties
 }
 
 
 impl Spacecraft {
-    pub fn new(conf: Conf) -> Spacecraft {
+    pub fn new(conf: Scenario) -> Spacecraft {
         Spacecraft {
             conf: conf,
             cur: SpacecraftDynamic::new(&conf),
@@ -43,8 +43,8 @@ impl Spacecraft {
         assert!(self.cur.acc.x.abs() < 100.0);
         assert!(self.cur.acc.y.abs() < 100.0);
 
-        assert!(-180.0*PI/180.0 <= self.cur.ang_pos);
-        assert!(self.cur.ang_pos <= 180.0*PI/180.0);
+        assert!(-180.1*PI/180.0 <= self.cur.ang_pos);
+        assert!(self.cur.ang_pos <= 180.1*PI/180.0);
 
         assert!(-5.0*PI/180.0 <= self.cur.ang_vel);
         assert!(self.cur.ang_vel <= 5.0*PI/180.0);

@@ -1,12 +1,13 @@
 use crate::adapters::common::{SensorsValues, ActuatorsValues};
-use crate::conf::Conf;
+use crate::conf::{Conf, Scenario};
 use crate::spacecraft::SpacecraftDynamic;
 use crate::utils::math::Vec2;
 use crate::utils::space::{moon_centrifugal, moon_gravity};
 
 
 pub struct Sim {
-    conf: Conf,                     // spacecraft configuration / static properties
+    dt_step: f64,
+    conf: Scenario,                 // spacecraft configuration / static properties
     cur: SpacecraftDynamic,         // latest changing properties
     all: Vec<SpacecraftDynamic>,    // all changing properties
 }
@@ -15,15 +16,16 @@ pub struct Sim {
 impl Sim {
     pub fn new(conf: Conf) -> Sim {
         Sim {
-            conf: conf,
-            cur: SpacecraftDynamic::new(&conf),
+            dt_step: conf.dt_step,
+            conf: conf.s,
+            cur: SpacecraftDynamic::new(&conf.s),
             all: vec![],
         }
     }
 
     pub fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
         Ok(SensorsValues {
-            dt_step: self.conf.dt_step,
+            dt_step: self.dt_step,
             spacecraft_acc: self.cur.acc,
             spacecraft_ang_acc: self.cur.ang_acc,
             spacecraft_altitude: Some(self.cur.pos.y),
@@ -31,7 +33,7 @@ impl Sim {
     }
 
     pub fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
-        let dt = self.conf.dt_step;
+        let dt = self.dt_step;
         let sc_mass = self.conf.sc_dry_mass + self.cur.fuel_mass;
 
         // compute t, mass
