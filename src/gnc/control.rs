@@ -19,7 +19,7 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
         &spacecraft.conf, ctr_ang_pos, sc_mass, sc_ang_pos, sc_ang_vel, eng_gimbal_cur,
     );
 
-    spacecraft.cur.eng_throttle = ctr_sc_thrust;
+    spacecraft.cur.eng_throttle = ctr_sc_thrust / sc_thrust;
     spacecraft.cur.eng_gimbal = ctr_eng_gimbal / spacecraft.conf.ctr_eng_gimbal_pos_max;
 
     ActuatorsValues {
@@ -42,7 +42,7 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
     // instead of wasting propelant, let gravity work
     if goal_acc.y < 0.0 {
         println!("WARN: gravity");
-        (1.0, PI)
+        (sc_thrust, PI)
     } else {
         let mut ctr_thrust = (goal_acc.x.powi(2) + goal_acc.y.powi(2)).powf(0.5) * sc_mass;
 
@@ -63,15 +63,15 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
             }
         }
 
-        (ctr_thrust/sc_thrust, ctr_angle)
+        (ctr_thrust, ctr_angle)
     }
 }
 
 
 /// Engine controller function (low level control)
 ///
-/// Controller implemented as a double (cascade) PID to control the spacecraft
-/// ang_pos via its ang_acc (engine gimbal).
+/// Controller implemented as a PID to control the spacecraft ang_pos via its
+/// ang_acc (engine gimbal).
 ///
 /// Input:
 ///     sc_attitude_desired, sc_attitude_current
@@ -80,36 +80,14 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
 /// Output:
 ///     commanded (engine) gimbal_angle (respecting engine constraints) as [-1; 1] of max gimbal
 ///
-/// Double PID block diagram:
-///
-/// ctr_ang_pos ----\
-///                 |
-/// sc_ang_pos -----O
-///                 | ang_pos_err
-///                 V
-///               PID 1
-///                 |
-///                 | ctr_ang_vel
-///                 |
-/// sc_ang_vel -----O
-///                 | ang_vel_err
-///                 V
-///               PID 2
-///                 |
-///                 | ctr_ang_acc
-///
 fn engine_controler(conf: &Conf, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
+    // ang PID, I=0, D using dpos' = -vel
+    let KP = 0.2;
+    let KD = 1.0;
 
-    // ang_pos_err and ctr_ang_vel - PID 1
+    let err = ctr_ang_pos - sc_ang_pos;
 
-    let ang_pos_err = ctr_ang_pos - sc_ang_pos;
-    let ctr_ang_vel = ang_pos_err * 0.5; // TODO PD. For now, assume a correction with T = 1 everywhere
-    // TODO check ctr_ang_vel: max 5 deg/sec -> How? Or dont check at all?
-
-    // ang_vel_err and ctr_ang_acc - PID 2
-
-    let ang_vel_err = ctr_ang_vel - sc_ang_vel;
-    let ctr_ang_acc = ang_vel_err; // TODO PD. For now, assume a correction with T = 1 everywhere
+    let ctr_ang_acc = err*KP + -sc_ang_vel*KD;
 
     // compute torque for correction
 
@@ -118,17 +96,14 @@ fn engine_controler(conf: &Conf, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64
 
     // compute engine gimbal
 
-    let max_eng_gimbal_pos = conf.ctr_eng_gimbal_pos_max;
-    let max_eng_gimbal_vel = conf.ctr_eng_gimbal_vel_max;
-
     let mut ctr_eng_gimbal = (ctr_torque/(conf.sc_height/2.0*conf.sc_nominal_thrust)).asin();  // Torque = L*F*sin(alpha)
-    ctr_eng_gimbal = saturate(ctr_eng_gimbal, -max_eng_gimbal_pos, max_eng_gimbal_pos);
 
     let eng_gimbal_err = ctr_eng_gimbal - eng_gimbal_cur;
-
-    if eng_gimbal_err.abs() > max_eng_gimbal_vel {
-        ctr_eng_gimbal = eng_gimbal_cur + sign(eng_gimbal_err)*max_eng_gimbal_vel;
+    if eng_gimbal_err.abs() > conf.ctr_eng_gimbal_vel_max {
+        ctr_eng_gimbal = eng_gimbal_cur + sign(eng_gimbal_err)*conf.ctr_eng_gimbal_vel_max;
     }
+
+    ctr_eng_gimbal = saturate(ctr_eng_gimbal, -conf.ctr_eng_gimbal_pos_max, conf.ctr_eng_gimbal_pos_max);
 
     // return
 

@@ -24,7 +24,7 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
     println!("tgo_estimate={:}", tgo);
 
     // Note: stop the loop a few seconds before touchdown, to prevent guidance from diverging to +/- inf
-    while tgo > 2.0 {
+    while tgo > 5.0 {
 
         // inputs, gnc, outputs
 
