@@ -1,13 +1,15 @@
 use crate::gnc::common::Spacecraft;
 use crate::utils::math::Vec2;
-use crate::utils::space::{moon_centrifugal, moon_gravity};
 
 
 /// Quadratic law: acc = af -6/tgo*(v0+vf) + 12/tgo.powi(2)*(pf-p0)
 /// For more info, cf. https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/
 pub fn gui(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 
-    let moon_acc_y = -moon_gravity(spacecraft.cur.pos.y) +moon_centrifugal(spacecraft.cur.vel.x, spacecraft.cur.pos.y);
+    let body_acc_y = (
+        -spacecraft.conf.body.gravity(spacecraft.cur.pos.y)
+        +spacecraft.conf.body.centrifugal(spacecraft.cur.vel.x, spacecraft.cur.pos.y)
+    );
 
     // x
 
@@ -35,7 +37,7 @@ pub fn gui(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 
     Vec2 {
         x: acc_x,
-        y: acc_y-moon_acc_y,
+        y: acc_y-body_acc_y,
     }
 }
 

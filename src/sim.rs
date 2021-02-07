@@ -1,7 +1,6 @@
 use crate::adapters::common::{SensorsValues, ActuatorsValues};
 use crate::conf::{Conf, Scenario};
 use crate::utils::math::Vec2;
-use crate::utils::space::{moon_centrifugal, moon_gravity};
 use crate::utils::spacecraft::SpacecraftDynamic;
 
 
@@ -57,15 +56,15 @@ impl Sim {
         let sc_ang_vel = self.cur.ang_vel + sc_ang_acc*dt;
         let sc_ang_pos = self.cur.ang_pos + sc_ang_vel*dt;
 
-        // compute thrust and acc/vel/pos
+        // compute thrust
 
         let engine_acc_norm = control.engine_throttle * self.conf.sc_nominal_thrust/sc_mass;
         let engine_acc = Vec2::new_polar(engine_acc_norm, self.cur.ang_pos);
         let gravity_acc = Vec2 {
             x: 0.0,
             y:
-                - moon_gravity(self.cur.pos.y)
-                + moon_centrifugal(self.cur.vel.x, self.cur.pos.y),
+                - self.conf.body.gravity(self.cur.pos.y)
+                + self.conf.body.centrifugal(self.cur.vel.x, self.cur.pos.y),
         };
         let sc_acc = engine_acc + gravity_acc;
         // self.g = self.acc_y/G0

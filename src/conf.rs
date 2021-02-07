@@ -1,11 +1,14 @@
 use serde::{Serialize, Deserialize};
 
 use crate::utils::math::Vec2;
+use crate::utils::bodies::Body;
 
 
 #[derive(Clone, Copy)]
 #[derive(Serialize, Deserialize)]
 pub struct Scenario {
+    pub body: Body,                     // orbited body, containing info about gravity, atmospheric, etc
+
     pub initial_sc_pos: Vec2,       // unit: m
     pub initial_sc_vel: Vec2,       // unit: m/s
     pub initial_sc_ang_pos: f64,    // unit: rad

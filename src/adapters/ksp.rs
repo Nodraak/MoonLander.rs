@@ -123,7 +123,7 @@ impl Adapter for AdapterKSP<'_> {
         // Not implemented
     }
 
-    fn export_to_csv(&self, tgo: f64) {
+    fn export_to_csv(&self, _tgo: f64) {
         // Not implemented
     }
 }

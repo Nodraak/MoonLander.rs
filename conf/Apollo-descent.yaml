@@ -2,6 +2,15 @@
 # Apollo descent
 #
 
+# Moon
+body:
+    radius: 1737.4e3
+    mass: 7.342e22
+    mu: 4.9048695e12
+    atm_r0: 0.0
+    atm_p0: 0.0
+    atm_a: 1.0
+
 initial_sc_pos: [-420000.0, 15000.0]
 initial_sc_vel: [1673.0, 0.0]
 initial_sc_ang_pos: 3.141593  # 180 = horiz
