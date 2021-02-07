@@ -5,7 +5,6 @@ mod adapters;
 mod conf;
 mod gnc;
 mod sim;
-mod spacecraft;
 mod utils;
 
 use std::process::exit;

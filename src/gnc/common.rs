@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 
 use crate::conf::Scenario;
-use crate::spacecraft::SpacecraftDynamic;
+use crate::utils::spacecraft::SpacecraftDynamic;
 
 
 pub struct Spacecraft {

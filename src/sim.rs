@@ -1,8 +1,8 @@
 use crate::adapters::common::{SensorsValues, ActuatorsValues};
 use crate::conf::{Conf, Scenario};
-use crate::spacecraft::SpacecraftDynamic;
 use crate::utils::math::Vec2;
 use crate::utils::space::{moon_centrifugal, moon_gravity};
+use crate::utils::spacecraft::SpacecraftDynamic;
 
 
 pub struct Sim {
