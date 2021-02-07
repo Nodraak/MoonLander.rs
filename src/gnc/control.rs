@@ -16,7 +16,7 @@ pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
 
     let (ctr_sc_thrust, ctr_ang_pos) = spacecraft_controler(goal_acc, sc_mass, sc_thrust);
     let ctr_eng_gimbal = engine_controler(
-        &spacecraft.conf, ctr_ang_pos, sc_mass, sc_ang_pos, sc_ang_vel, eng_gimbal_cur,
+        &spacecraft.conf, spacecraft.cur.dt, ctr_ang_pos, sc_mass, sc_ang_pos, sc_ang_vel, eng_gimbal_cur,
     );
 
     spacecraft.cur.eng_throttle = ctr_sc_thrust / sc_thrust;
@@ -80,12 +80,12 @@ fn spacecraft_controler(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f
 /// Output:
 ///     commanded (engine) gimbal_angle (respecting engine constraints) as [-1; 1] of max gimbal
 ///
-fn engine_controler(conf: &Scenario, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
+fn engine_controler(conf: &Scenario, dt: f64, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
     // ang PID, I=0, D using dpos' = -vel
-    let KP = 0.2;
+    let KP = 0.02;
     let KD = 1.0;
 
-    let err = ctr_ang_pos - sc_ang_pos;
+    let err = (ctr_ang_pos - sc_ang_pos)/dt;
 
     let ctr_ang_acc = err*KP + -sc_ang_vel*KD;
 
@@ -100,7 +100,7 @@ fn engine_controler(conf: &Scenario, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos:
 
     let eng_gimbal_err = ctr_eng_gimbal - eng_gimbal_cur;
     if eng_gimbal_err.abs() > conf.ctr_eng_gimbal_vel_max {
-        ctr_eng_gimbal = eng_gimbal_cur + sign(eng_gimbal_err)*conf.ctr_eng_gimbal_vel_max;
+        ctr_eng_gimbal = eng_gimbal_cur + sign(eng_gimbal_err)*conf.ctr_eng_gimbal_vel_max*dt;
     }
 
     ctr_eng_gimbal = saturate(ctr_eng_gimbal, -conf.ctr_eng_gimbal_pos_max, conf.ctr_eng_gimbal_pos_max);

@@ -6,6 +6,7 @@ pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: &SensorsValues) {
     let dt = sensors_vals.dt_step;
 
     spacecraft.cur.t += dt;
+    spacecraft.cur.dt = dt;
 
     spacecraft.cur.fuel_mass -= spacecraft.conf.sc_nominal_mass_flow*spacecraft.cur.eng_throttle*dt;
 

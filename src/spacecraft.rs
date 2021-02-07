@@ -7,6 +7,7 @@ use crate::utils::math::Vec2;
 #[derive(Clone, Copy)]
 pub struct SpacecraftDynamic {
     pub t: f64,                         // unit: sec - time since beginning of simulation
+    pub dt: f64,                        // unit: sec
 
     pub eng_throttle: f64,              // unit: 0-1
     pub eng_gimbal: f64,                // unit: rad
@@ -27,6 +28,7 @@ impl SpacecraftDynamic {
     pub fn new(conf: &Scenario) -> SpacecraftDynamic {
         SpacecraftDynamic {
             t: 0.0,
+            dt: 1.0,
 
             eng_gimbal: 0.0,
             eng_throttle: 0.0,
