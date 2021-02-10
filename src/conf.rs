@@ -17,6 +17,7 @@ pub struct Scenario {
     pub sc_width: f64,              // unit: m
     pub sc_height: f64,             // unit: m
     pub sc_dry_mass: f64,           // unit: kg
+    pub sc_cd: f64,                 // unit: - - drag coefficient (https://en.wikipedia.org/wiki/Drag_coefficient)
 
     pub sc_nominal_thrust: f64,     // unit: N
     pub sc_nominal_isp: f64,        // unit: s

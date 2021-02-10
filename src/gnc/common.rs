@@ -53,24 +53,24 @@ impl Spacecraft {
         assert!(self.cur.ang_acc <= 1.0*PI/180.0);
     }
 
-    pub fn export_to_csv_header(&self) {
-        println!("CSV SC filtering key;tgo;eng_throttle;mass;eng_gimbal;sc_ang_acc;sc_ang_vel;sc_ang_pos;acc_x;acc_y;vel_x;vel_y;pos_x;pos_y;");
-    }
-
     pub fn export_to_csv(&self, tgo: f64) {
         let mass = self.conf.sc_dry_mass + self.cur.fuel_mass;
         println!(
-            "CSV SC;{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};",
+            "CSV SC;{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};",
             tgo,
             self.cur.eng_throttle,
             mass,
             self.cur.eng_gimbal*self.conf.ctr_eng_gimbal_pos_max,
-            self.cur.ang_acc,
-            self.cur.ang_vel,
-            self.cur.ang_pos,
+            self.cur.acc_thrust,
+            self.cur.acc_atm,
+            self.cur.acc_gravity,
+            self.cur.acc_centrifugal,
             self.cur.acc.x, self.cur.acc.y,
             self.cur.vel.x, self.cur.vel.y,
             self.cur.pos.x, self.cur.pos.y,
+            self.cur.ang_acc,
+            self.cur.ang_vel,
+            self.cur.ang_pos,
         );
     }
 }

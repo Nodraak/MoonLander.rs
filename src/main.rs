@@ -42,10 +42,6 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
 
         // export
 
-        // if ((tgo as u64) % 50) == 0 {
-        //     sc.export_to_csv_header();
-        //     adapter.export_to_csv_header();
-        // }
         sc.export_to_csv(tgo);
         adapter.export_to_csv(tgo);
 

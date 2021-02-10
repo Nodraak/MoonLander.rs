@@ -56,7 +56,8 @@ The graphs will also be saved as `output.png`.
 
 Example:
 
-![](docs/images/plot.png)
+![](docs/images/plot_ctr_ang.png)
+![](docs/images/plot_nav.png)
 
 ## Key concepts needed for landing on the Moon
 

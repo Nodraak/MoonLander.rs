@@ -20,6 +20,9 @@ impl Vec2 {
         }
     }
 
+    pub fn norm(self) -> f64 {
+        (self.x*self.x + self.y*self.y).powf(0.5)
+    }
 }
 
 

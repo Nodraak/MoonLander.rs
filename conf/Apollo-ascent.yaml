@@ -19,6 +19,7 @@ initial_sc_fuel_mass: 2350.0
 sc_width: 4.0
 sc_height: 8.0
 sc_dry_mass: 2400.0
+sc_cd: 1.15  # drag coefficient of a cylinder. dont care if in space.
 
 sc_nominal_thrust: 16000.0
 sc_nominal_isp: 311.0

@@ -119,10 +119,6 @@ impl Adapter for AdapterKSP<'_> {
         Ok(())
     }
 
-    fn export_to_csv_header(&self) {
-        // Not implemented
-    }
-
     fn export_to_csv(&self, _tgo: f64) {
         // Not implemented
     }
