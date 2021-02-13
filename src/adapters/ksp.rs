@@ -71,10 +71,6 @@ impl Adapter for AdapterKSP<'_> {
             .getattr("met").unwrap()
             .extract().unwrap();
 
-        let dt = met - self.last_met;
-
-        // TODO if dt == 0 => game is paused, return None
-
         let vel_ = self.vessel
             .call_method1("flight", (self.body_ref_frame, )).unwrap()
             .getattr("velocity").unwrap();
@@ -91,9 +87,17 @@ impl Adapter for AdapterKSP<'_> {
 
         // Compute sensor data
 
-        let acc_x = (vel_horiz-self.last_vel_horiz)/dt;
-        let acc_y = (vel_vert-self.last_vel_vert)/dt;
-        let ang_acc = (pitch-self.last_pitch)/dt * PI/180.0;  // KSP pitch is in deg, convert to rad
+        let mut dt: f64 = met - self.last_met;
+        let mut acc_x = (vel_horiz-self.last_vel_horiz)/dt;
+        let mut acc_y = (vel_vert-self.last_vel_vert)/dt;
+        let mut ang_acc = (pitch-self.last_pitch)/dt * PI/180.0;  // KSP pitch is in deg, convert to rad
+
+        if (dt.abs() < 0.001) || (dt.abs() > 1.000) {
+            acc_x = 0.0;
+            acc_y = 0.0;
+            ang_acc = 0.0;
+            dt = 1.0;
+        }
 
         // Update internal state and return
 

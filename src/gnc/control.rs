@@ -101,6 +101,8 @@ fn control_translation(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f6
 ///     commanded (engine) gimbal_angle (respecting engine constraints) as [-1; 1] of max gimbal
 ///
 fn control_angular(conf: &Scenario, dt: f64, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
+    assert!(dt > 1e-6);
+
     // ang PID, I=0, D using dpos' = -vel
     let KP = 0.02;
     let KD = 1.0;
@@ -116,7 +118,10 @@ fn control_angular(conf: &Scenario, dt: f64, ctr_ang_pos: f64, sc_mass: f64, sc_
 
     // compute engine gimbal
 
-    let mut ctr_eng_gimbal = (ctr_torque/(conf.sc_height/2.0*conf.sc_nominal_thrust)).asin();  // Torque = L*F*sin(alpha)
+    let sin_gimbal = ctr_torque/(conf.sc_height/2.0*conf.sc_nominal_thrust);  // Torque = L*F*sin(alpha)
+    assert!(sin_gimbal.abs() <= 1.0);
+
+    let mut ctr_eng_gimbal = sin_gimbal.asin();
 
     let eng_gimbal_err = ctr_eng_gimbal - eng_gimbal_cur;
     if eng_gimbal_err.abs() > conf.ctr_eng_gimbal_vel_max {

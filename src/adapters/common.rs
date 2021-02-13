@@ -8,6 +8,7 @@ pub trait Adapter {
 }
 
 /// Note: Sim is 2D, KSP will project on the (velocity vector, local vertical) plane
+#[derive(Debug)]
 pub struct SensorsValues {
     pub dt_step: f64,
 
@@ -21,6 +22,7 @@ pub struct SensorsValues {
 }
 
 /// Note: Sim is 2D, KSP will project on the (velocity vector, local vertical) plane
+#[derive(Debug)]
 pub struct ActuatorsValues {
     pub engine_throttle: f64,   // unit: [0; 1] of max (nominal) thrust
     pub engine_gimbal: f64,     // unit: [-1; 1] of max gimbal

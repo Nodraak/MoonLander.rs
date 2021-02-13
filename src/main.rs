@@ -28,22 +28,24 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
             tgo_estimate(&sc, sc.conf.s.gui_vf_x, sc.conf.s.gui_vf_y, sc.conf.s.tgo_thrust_mul)
         }
     };
-    println!("tgo init = {:}", tgo);
 
     loop {
-
         if conf.s.tgo_method == TgoEstimate::TgoEstimateUpdating {
             tgo = tgo_estimate(&sc, sc.conf.s.gui_vf_x, sc.conf.s.gui_vf_y, sc.conf.s.tgo_thrust_mul);
         }
 
+        println!("[LOGD:land] tgo={:.3}", tgo);
+
         // inputs, gnc, outputs
 
         let sensors_vals = adapter.read_sensors().unwrap();
+        println!("[LOGD:land] SensorsValues={:?}", sensors_vals);
 
         gnc::navigation::nav(&mut sc, &sensors_vals);
         let gui_out = gnc::guidance::gui(&sc, tgo);
         let actuators_vals = gnc::control::ctr(&mut sc, gui_out);
 
+        println!("[LOGD:land] ActuatorsValues={:?}", actuators_vals);
         adapter.write_actuators(actuators_vals);
 
         // quick check internal state

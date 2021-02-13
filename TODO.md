@@ -28,6 +28,7 @@
     * [ok] Rust I/O adapters prototypes (rust for Sim, Python for Krcp) -> Adapter trait
     * [ok] Setup KSP addons
     * [ok] Implement Krpc interfaces (read & write)
+    * [ok] Error handling (Nan, div by zero, etc)
     * [wip] Test whole I/O chain (read & write)
 3. Start Nodraak's space program on KSP
     * [wip] Update lander spec
