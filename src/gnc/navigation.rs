@@ -28,6 +28,8 @@ pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: &SensorsValues) {
     spacecraft.cur.vel += spacecraft.cur.acc*dt;
     spacecraft.cur.pos += spacecraft.cur.vel*dt;
 
+    spacecraft.cur.dv += spacecraft.cur.acc_thrust*dt;
+
     spacecraft.cur.ang_vel += sensors_vals.spacecraft_ang_acc*dt;
     spacecraft.cur.ang_pos += spacecraft.cur.ang_vel*dt;
 

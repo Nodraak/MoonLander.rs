@@ -72,6 +72,8 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
     } else {
         println!("Landing is FAILED");
     }
+
+    println!("spacecraft.dv: {:.1} m/s", sc.cur.dv);
 }
 
 

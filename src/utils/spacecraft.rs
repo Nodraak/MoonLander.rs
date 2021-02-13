@@ -29,6 +29,8 @@ pub struct SpacecraftDynamic {
     pub vel: Vec2,                      // unit: m/s
     pub acc: Vec2,                      // unit: m/s**2
 
+    pub dv: f64,                        // unit: m/s - dv expended until now
+
     // nav ang
 
     pub ang_pos: f64,                   // unit: rad
@@ -56,6 +58,8 @@ impl SpacecraftDynamic {
             pos: conf.initial_sc_pos,
             vel: conf.initial_sc_vel,
             acc: Vec2 {x: 0.0, y: 0.0},
+
+            dv: 0.0,
 
             ang_pos: conf.initial_sc_ang_pos,
             ang_vel: 0.0,
