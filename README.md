@@ -54,7 +54,7 @@ You can pipe moon_lander's stdout to plotter.py: `cargo run -- -c conf/Apollo-de
 It will run MoonLander, then show some curves.
 The graphs will also be saved as `output.png`.
 
-Example:
+Example landing (Apollo scenario):
 
 ![](docs/images/plot_ctr_ang.png)
 ![](docs/images/plot_nav.png)
@@ -64,4 +64,4 @@ Example:
 * GNC
 * TGO-based guidance (PID with a predesigned trajectory is flaky)
 * Take into account moon_gravity and moon_centrifugal (guidance)
-* Double cascade PID for angular control of the spacecraft with the engine
+* PD controller for the engine gimbal, using the spacecraft's angular position (P term) and velocity (D term)
