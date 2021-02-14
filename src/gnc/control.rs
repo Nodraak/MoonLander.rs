@@ -21,17 +21,18 @@ pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
             control_translation(goal_acc, sc_mass, sc_thrust)
         },
         CtrSpacecraft::CtrSpacecraftAscentToOrbit => {
+            let (_thrust, ctr_ang_pos_optim) = control_translation(goal_acc, sc_mass, sc_thrust);
+
             // to avoid a dangerously big angular command, perform a nice constant pitch rate
+            let tf = 50.0;
 
-            let tf = 30.0;
-            let af = deg2rad(55.0);
-
-            if spacecraft.cur.t < tf {
-                let ctr_sc_thrust = sc_thrust;
-                let ctr_ang_pos = deg2rad(90.0) - spacecraft.cur.t*af/tf;
-                (ctr_sc_thrust, ctr_ang_pos)
+            if spacecraft.cur.t > tf {
+                (sc_thrust, ctr_ang_pos_optim)
             } else {
-                control_translation(goal_acc, sc_mass, sc_thrust)
+                let af = ctr_ang_pos_optim;
+
+                let ctr_ang_pos = deg2rad(90.0) - spacecraft.cur.t/tf*(deg2rad(90.0)-af);
+                (sc_thrust, ctr_ang_pos)
             }
         },
     };
