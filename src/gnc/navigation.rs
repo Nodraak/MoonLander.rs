@@ -41,13 +41,16 @@ pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: &SensorsValues) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::math::Vec2;
 
     #[test]
     fn test_nav_1() {
         let mut sc = Spacecraft::new();
 
-        nav(&mut sc, SensorsValues {
+        nav(&mut sc, &SensorsValues {
+            dt_step: 1.0,
             spacecraft_acc: Vec2 {x: 1.0, y: 2.0},
+            spacecraft_ang_acc: 0.0,
             spacecraft_altitude: None,
         });
         assert_eq!(sc.cur.acc.x, 1.0);
@@ -57,8 +60,10 @@ mod tests {
         assert_eq!(sc.cur.vel.y, 2.0);
         assert_eq!(sc.cur.pos.y, 15_000.0+2.0);
 
-        nav(&mut sc, SensorsValues {
+        nav(&mut sc, &SensorsValues {
+            dt_step: 1.0,
             spacecraft_acc: Vec2 {x: 3.0, y: 4.0},
+            spacecraft_ang_acc: 0.0,
             spacecraft_altitude: None,
         });
         assert_eq!(sc.cur.acc.x, 3.0);
