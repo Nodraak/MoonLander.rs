@@ -238,6 +238,19 @@ def plot_all(sc_data, sim_data, save_to_file=None):
     print('Saving plot to output_nav.png')
     plt.savefig('output_nav.png')
 
+    #
+    # Figure 3 - gui
+    #
+
+    plt.figure(figsize=MATPLOTLIB_FIGSIZE)
+
+    subplot_plot_single_axis(
+        1, 1, 1, xs, [
+            ('gui_x (m/s**2)', (sc_data.cur['gui_x'], sim_data.cur['gui_x'])),
+            ('gui_y (m/s**2)', (sc_data.cur['gui_y'], sim_data.cur['gui_y'])),
+        ],
+    )
+
 
 def main():
     sc_data = SpacecraftData()

@@ -3,7 +3,7 @@ use crate::gnc::common::Spacecraft;
 use crate::utils::math::Vec2;
 
 
-pub fn gui(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
+pub fn gui(spacecraft: &mut Spacecraft, tgo: f64) {
     let body_acc_y = (
         -spacecraft.conf.s.body.gravity(spacecraft.cur.pos.y)
         +spacecraft.conf.s.body.centrifugal(spacecraft.cur.vel.x, spacecraft.cur.pos.y)
@@ -14,7 +14,7 @@ pub fn gui(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
         GuiSpacecraft::GuiAscent => gui_ascent(spacecraft, tgo),
     };
 
-    acc + Vec2 {
+    spacecraft.cur.gui = acc + Vec2 {
         x: 0.0,
         y: -body_acc_y,
     }

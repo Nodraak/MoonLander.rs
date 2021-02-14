@@ -46,8 +46,8 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
         println!("[LOGD:land] SensorsValues={}", serde_json::to_string(&sensors_vals).unwrap());
 
         gnc::navigation::nav(&mut sc, &sensors_vals);
-        let gui_out = gnc::guidance::gui(&sc, tgo);
-        let actuators_vals = gnc::control::ctr(&mut sc, gui_out);
+        gnc::guidance::gui(&mut sc, tgo);
+        let actuators_vals = gnc::control::ctr(&mut sc);
 
         println!("[LOGD:land] ActuatorsValues={}", serde_json::to_string(&actuators_vals).unwrap());
         adapter.write_actuators(actuators_vals);

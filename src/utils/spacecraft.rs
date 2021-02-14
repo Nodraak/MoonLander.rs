@@ -9,17 +9,15 @@ use crate::utils::math::Vec2;
 #[derive(Clone, Copy)]
 #[derive(Serialize, Deserialize)]
 pub struct SpacecraftDynamic {
+
+    // nav miscs
+
     pub t: f64,                         // unit: sec - time since beginning of simulation
     pub dt: f64,                        // unit: sec
 
-    // ctr
-
-    pub eng_throttle: f64,              // unit: 0-1
     pub fuel_mass: f64,                 // unit: kg
 
-    pub eng_gimbal: f64,                // unit: 0-1
-
-    // acc
+    // nav acc
 
     pub acc_thrust: f64,
     pub acc_atm: f64,
@@ -39,6 +37,15 @@ pub struct SpacecraftDynamic {
     pub ang_pos: f64,                   // unit: rad
     pub ang_vel: f64,                   // unit: rad/s
     pub ang_acc: f64,                   // unit: rad/s**2
+
+    // gui
+
+    pub gui: Vec2,                      // unit: m/s**2
+
+    // ctr
+
+    pub eng_throttle: f64,              // unit: 0-1
+    pub eng_gimbal: f64,                // unit: 0-1
 }
 
 
@@ -67,6 +74,8 @@ impl SpacecraftDynamic {
             ang_pos: conf.initial_sc_ang_pos,
             ang_vel: 0.0,
             ang_acc: 0.0,
+
+            gui: Vec2 {x: 0.0, y: 0.0},
         }
     }
 }

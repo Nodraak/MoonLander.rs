@@ -7,13 +7,14 @@ use crate::utils::math::{Vec2, deg2rad, sign, saturate};
 
 
 /// Main control function
-pub fn ctr(spacecraft: &mut Spacecraft, goal_acc: Vec2) -> ActuatorsValues {
+pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
     let conf = spacecraft.conf.s;
     let sc_mass = conf.sc_dry_mass + spacecraft.cur.fuel_mass;
     let sc_thrust = conf.sc_nominal_thrust;
     let sc_ang_pos = spacecraft.cur.ang_pos;
     let sc_ang_vel = spacecraft.cur.ang_vel;
     let eng_gimbal_cur = spacecraft.cur.eng_gimbal*conf.ctr_eng_gimbal_pos_max;
+    let goal_acc = spacecraft.cur.gui;
 
     let (ctr_sc_thrust, ctr_ang_pos) = match conf.ctr_spacecraft {
         CtrSpacecraft::CtrSpacecraftDescent => {
