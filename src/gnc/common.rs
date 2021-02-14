@@ -57,24 +57,11 @@ impl Spacecraft {
         assert!(self.cur.ang_acc <= 1.0*PI/180.0);
     }
 
-    pub fn export_to_csv(&self, tgo: f64) {
-        let mass = self.conf.s.sc_dry_mass + self.cur.fuel_mass;
-        println!(
-            "CSV SC;{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};",
-            tgo,
-            self.cur.eng_throttle,
-            mass,
-            self.cur.eng_gimbal*self.conf.s.ctr_eng_gimbal_pos_max,
-            self.cur.acc_thrust,
-            self.cur.acc_atm,
-            self.cur.acc_gravity,
-            self.cur.acc_centrifugal,
-            self.cur.acc.x, self.cur.acc.y,
-            self.cur.vel.x, self.cur.vel.y,
-            self.cur.pos.x, self.cur.pos.y,
-            self.cur.ang_acc,
-            self.cur.ang_vel,
-            self.cur.ang_pos,
-        );
+    pub fn export_to_csv_conf(&self) {
+        println!("[LOGD:Spacecraft::export_to_csv_conf] CSV={}", serde_json::to_string(&self.conf.s).unwrap());
+    }
+
+    pub fn export_to_csv_cur(&self) {
+        println!("[LOGD:Spacecraft::export_to_csv_cur] CSV={}", serde_json::to_string(&self.cur).unwrap());
     }
 }

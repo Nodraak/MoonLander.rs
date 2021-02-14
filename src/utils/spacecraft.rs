@@ -1,3 +1,5 @@
+use serde::{Serialize, Deserialize};
+
 use crate::conf::Scenario;
 use crate::utils::math::Vec2;
 
@@ -5,6 +7,7 @@ use crate::utils::math::Vec2;
 /// changing properties
 #[derive(Debug)]
 #[derive(Clone, Copy)]
+#[derive(Serialize, Deserialize)]
 pub struct SpacecraftDynamic {
     pub t: f64,                         // unit: sec - time since beginning of simulation
     pub dt: f64,                        // unit: sec
@@ -14,7 +17,7 @@ pub struct SpacecraftDynamic {
     pub eng_throttle: f64,              // unit: 0-1
     pub fuel_mass: f64,                 // unit: kg
 
-    pub eng_gimbal: f64,                // unit: rad
+    pub eng_gimbal: f64,                // unit: 0-1
 
     // acc
 

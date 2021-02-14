@@ -10,8 +10,9 @@ mod utils;
 use std::process::exit;
 use std::{thread, time};
 use clap;
-use serde_yaml;
 use pyo3::prelude::*;
+use serde_json;
+use serde_yaml;
 use crate::conf::{Scenario, Conf, TgoEstimate, SubCommand};
 use crate::gnc::common::Spacecraft;
 use crate::utils::space::{tgo_estimate, has_softly_landed};
@@ -29,6 +30,9 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
         }
     };
 
+    sc.export_to_csv_conf();
+    adapter.export_to_csv_conf();
+
     loop {
         if conf.s.tgo_method == TgoEstimate::TgoEstimateUpdating {
             tgo = tgo_estimate(&sc, sc.conf.s.gui_vf_x, sc.conf.s.gui_vf_y, sc.conf.s.tgo_thrust_mul);
@@ -39,13 +43,13 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
         // inputs, gnc, outputs
 
         let sensors_vals = adapter.read_sensors().unwrap();
-        println!("[LOGD:land] SensorsValues={:?}", sensors_vals);
+        println!("[LOGD:land] SensorsValues={}", serde_json::to_string(&sensors_vals).unwrap());
 
         gnc::navigation::nav(&mut sc, &sensors_vals);
         let gui_out = gnc::guidance::gui(&sc, tgo);
         let actuators_vals = gnc::control::ctr(&mut sc, gui_out);
 
-        println!("[LOGD:land] ActuatorsValues={:?}", actuators_vals);
+        println!("[LOGD:land] ActuatorsValues={}", serde_json::to_string(&actuators_vals).unwrap());
         adapter.write_actuators(actuators_vals);
 
         // quick check internal state
@@ -54,8 +58,8 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
 
         // export
 
-        sc.export_to_csv(tgo);
-        adapter.export_to_csv(tgo);
+        sc.export_to_csv_cur();
+        adapter.export_to_csv_cur();
 
         // Stop the loop a few seconds before touchdown, to prevent guidance from diverging to +/- inf
 

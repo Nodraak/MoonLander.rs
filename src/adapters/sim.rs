@@ -37,7 +37,11 @@ impl Adapter for AdapterSim {
         self.sim.write_actuators(control)
     }
 
-    fn export_to_csv(&self, tgo: f64) {
-        self.sim.export_to_csv(tgo);
+    fn export_to_csv_conf(&self) {
+        self.sim.export_to_csv_conf();
+    }
+
+    fn export_to_csv_cur(&self) {
+        self.sim.export_to_csv_cur();
     }
 }

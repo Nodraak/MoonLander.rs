@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import json
+import re
 import sys
 from math import pi
 from matplotlib import pyplot as plt
@@ -11,38 +13,43 @@ MATPLOTLIB_FIGSIZE = (2*6.4, 2*4.8)
 
 class SpacecraftData:
     def __init__(self):
-        self.tgo = []
+        self.conf = None
+        self.cur = None
+        self.processed = None
 
-        # ctr
+    def add_conf(self, conf):
+        assert self.conf is None
+        self.conf = conf
 
-        self.eng_throttle = []
-        self.mass = []
+    def add_cur(self, cur):
+        if self.cur is None:
+            self.cur = {}
 
-        self.eng_gimbal = []
+        for k1, v1 in cur.items():
+            if isinstance(v1, dict):
+                for k2, v2 in v1.items():
+                    k = '%s_%s' % (k1, k2)
+                    v = v2
 
-        # acc
+                    if k not in self.cur:
+                        self.cur[k] = []
+                    self.cur[k].append(v)
+            else:
+                if k1 not in self.cur:
+                    self.cur[k1] = []
+                self.cur[k1].append(v1)
 
-        self.acc_thrust = []
-        self.acc_atm = []
-        self.acc_gravity = []
-        self.acc_centrifugal = []
+    def process(self):
+        self.processed = {}
 
-        # nav - trans
+        self.processed['mass'] = [
+            self.conf['sc_dry_mass']+fuel for fuel in self.cur['fuel_mass']
+        ]
+        self.processed['eng_gimbal'] = [
+            self.conf['ctr_eng_gimbal_pos_max']*eng_gimbal for eng_gimbal in self.cur['eng_gimbal']
+        ]
 
-        self.acc_x = []
-        self.acc_y = []
-
-        self.vel_x = []
-        self.vel_y = []
-
-        self.pos_x = []
-        self.pos_y = []
-
-        # nav - ang
-
-        self.ang_acc = []
-        self.ang_vel = []
-        self.ang_pos = []
+        self.processed['eng_gimbal_vel'] = [0] + list(np.diff(self.processed['eng_gimbal']))
 
 
 def rad2deg(rads):
@@ -114,7 +121,8 @@ def subplot_plot_twin_axis(plot_rows, plot_cols, plot_id, xs, plot_spec, align_y
 
     for _label, curves, _horiz in plot_spec:
         for curve in curves:
-            assert len(xs) == len(curve)
+            assert len(xs) == len(curve), \
+                "For curve %s , expected len(xs) == len(curve) but %d != %d" % (_label, len(xs), len(curve))
 
     COLORS_YLABEL = ['blue', 'red']
     COLORS_DATA = [['blue', 'darkblue'], ['red', 'darkred']]
@@ -153,7 +161,7 @@ def subplot_plot_twin_axis(plot_rows, plot_cols, plot_id, xs, plot_spec, align_y
 
 
 def plot_all(sc_data, sim_data, save_to_file=None):
-    xs = [sc_data.tgo[0]-t for t in sc_data.tgo]
+    xs = sc_data.cur['t']
 
     #
     # Figure 1 - ctr and ang
@@ -163,23 +171,23 @@ def plot_all(sc_data, sim_data, save_to_file=None):
 
     subplot_plot_twin_axis(
         3, 1, 1, xs, [
-            ('eng_throttle (0-1)', (sc_data.eng_throttle, sim_data.eng_throttle), None),
-            ('mass (kg)', (sc_data.mass, sim_data.mass), None),
+            ('eng_throttle (0-1)', (sc_data.cur['eng_throttle'], sim_data.cur['eng_throttle']), None),
+            ('mass (kg)', (sc_data.processed['mass'], sim_data.processed['mass']), None),
         ]
     )
 
     subplot_plot_twin_axis(
         3, 1, 2, xs, [
-            ('gimbal pos (deg)', (rad2deg(sc_data.eng_gimbal), rad2deg(sim_data.eng_gimbal)), 0),
-            ('gimbal vel (deg/sec)', (rad2deg(sc_data.eng_gimbal_vel), rad2deg(sim_data.eng_gimbal_vel)), 0),
+            ('gimbal pos (deg)', (rad2deg(sc_data.cur['eng_gimbal']), rad2deg(sim_data.cur['eng_gimbal'])), 0),
+            ('gimbal vel (deg/sec)', (rad2deg(sc_data.processed['eng_gimbal_vel']), rad2deg(sim_data.processed['eng_gimbal_vel'])), 0),
         ],
         align_yaxis=True,
     )
 
     subplot_plot_twin_axis(
         3, 1, 3, xs, [
-            ('ang vel (deg/sec)', (rad2deg(sc_data.ang_vel), rad2deg(sim_data.ang_vel)), 0),
-            ('ang pos (deg)', (rad2deg(sc_data.ang_pos), rad2deg(sim_data.ang_pos)), 90),
+            ('ang vel (deg/sec)', (rad2deg(sc_data.cur['ang_vel']), rad2deg(sim_data.cur['ang_vel'])), 0),
+            ('ang pos (deg)', (rad2deg(sc_data.cur['ang_pos']), rad2deg(sim_data.cur['ang_pos'])), 90),
         ],
     )
 
@@ -196,32 +204,32 @@ def plot_all(sc_data, sim_data, save_to_file=None):
 
     subplot_plot_single_axis(
         4, 1, 1, xs, [
-            ('acc_thrust (m/s**2)', (sc_data.acc_thrust, sim_data.acc_thrust)),
-            ('acc_atm (m/s**2)', (sc_data.acc_atm, sim_data.acc_atm)),
-            ('acc_gravity (m/s**2)', (sc_data.acc_gravity, sim_data.acc_gravity)),
-            ('acc_centrifugal (m/s**2)', (sc_data.acc_centrifugal, sim_data.acc_centrifugal)),
+            ('acc_thrust (m/s**2)', (sc_data.cur['acc_thrust'], sim_data.cur['acc_thrust'])),
+            ('acc_atm (m/s**2)', (sc_data.cur['acc_atm'], sim_data.cur['acc_atm'])),
+            ('acc_gravity (m/s**2)', (sc_data.cur['acc_gravity'], sim_data.cur['acc_gravity'])),
+            ('acc_centrifugal (m/s**2)', (sc_data.cur['acc_centrifugal'], sim_data.cur['acc_centrifugal'])),
         ],
     )
 
     subplot_plot_twin_axis(
         4, 1, 2, xs, [
-            ('acc x (m/sec**2)', (sc_data.acc_x, sim_data.acc_x), 0),
-            ('acc y (m/sec**2)', (sc_data.acc_y, sim_data.acc_y), 0),
+            ('acc x (m/sec**2)', (sc_data.cur['acc_x'], sim_data.cur['acc_x']), 0),
+            ('acc y (m/sec**2)', (sc_data.cur['acc_y'], sim_data.cur['acc_y']), 0),
         ],
         align_yaxis=True,
     )
 
     subplot_plot_twin_axis(
         4, 1, 3, xs, [
-            ('vel x (m/sec)', (sc_data.vel_x, sim_data.vel_x), 0),
-            ('vel y (m/sec)', (sc_data.vel_y, sim_data.vel_y), 0),
+            ('vel x (m/sec)', (sc_data.cur['vel_x'], sim_data.cur['vel_x']), 0),
+            ('vel y (m/sec)', (sc_data.cur['vel_y'], sim_data.cur['vel_y']), 0),
         ],
     )
 
     subplot_plot_twin_axis(
         4, 1, 4, xs, [
-            ('pos x (m)', (sc_data.pos_x, sim_data.pos_x), 0),
-            ('pos y (m)', (sc_data.pos_y, sim_data.pos_y), 0),
+            ('pos x (m)', (sc_data.cur['pos_x'], sim_data.cur['pos_x']), 0),
+            ('pos y (m)', (sc_data.cur['pos_y'], sim_data.cur['pos_y']), 0),
         ],
     )
 
@@ -235,54 +243,35 @@ def main():
     sc_data = SpacecraftData()
     sim_data = SpacecraftData()
 
-    print('Reading CSV data from stdin');
+    print('Reading CSV data from stdin')
 
     for line in sys.stdin:
-        if line.startswith('CSV SC;'):
-            vals = [float(f) for f in line.strip().split(';')[1:] if f]
-            sc_data.tgo.append(vals[0])
-            sc_data.eng_throttle.append(vals[1])
-            sc_data.mass.append(vals[2])
-            sc_data.eng_gimbal.append(vals[3])
-            sc_data.acc_thrust.append(vals[4])
-            sc_data.acc_atm.append(vals[5])
-            sc_data.acc_gravity.append(vals[6])
-            sc_data.acc_centrifugal.append(vals[7])
-            sc_data.acc_x.append(vals[8])
-            sc_data.acc_y.append(vals[9])
-            sc_data.vel_x.append(vals[10])
-            sc_data.vel_y.append(vals[11])
-            sc_data.pos_x.append(vals[12])
-            sc_data.pos_y.append(vals[13])
-            sc_data.ang_acc.append(vals[14])
-            sc_data.ang_vel.append(vals[15])
-            sc_data.ang_pos.append(vals[16])
-        elif line.startswith('CSV SIM;'):
-            vals = [float(f) for f in line.strip().split(';')[1:] if f]
-            sim_data.tgo.append(vals[0])
-            sim_data.eng_throttle.append(vals[1])
-            sim_data.mass.append(vals[2])
-            sim_data.eng_gimbal.append(vals[3])
-            sim_data.acc_thrust.append(vals[4])
-            sim_data.acc_atm.append(vals[5])
-            sim_data.acc_gravity.append(vals[6])
-            sim_data.acc_centrifugal.append(vals[7])
-            sim_data.acc_x.append(vals[8])
-            sim_data.acc_y.append(vals[9])
-            sim_data.vel_x.append(vals[10])
-            sim_data.vel_y.append(vals[11])
-            sim_data.pos_x.append(vals[12])
-            sim_data.pos_y.append(vals[13])
-            sim_data.ang_acc.append(vals[14])
-            sim_data.ang_vel.append(vals[15])
-            sim_data.ang_pos.append(vals[16])
-        else:
-            continue
+        line = line.strip()
 
-    sc_data.eng_gimbal_vel = [0] + list(np.diff(sc_data.eng_gimbal))
-    sim_data.eng_gimbal_vel = [0] + list(np.diff(sim_data.eng_gimbal))
+        ret = re.findall(r'^\[LOGD:(.+)::(.+)\] CSV=(\{.+\})$', line)
+        if ret:
+            obj, func, data = ret[0]
 
-    print('Read and parsed all data, plotting - len=%d' % len(sc_data.tgo))
+            if obj == 'Spacecraft':
+                obj = sc_data
+            elif obj == 'Sim':
+                obj = sim_data
+            else:
+                raise Exception
+
+            if func == 'export_to_csv_cur':
+                func = 'add_cur'
+            elif func == 'export_to_csv_conf':
+                func = 'add_conf'
+            else:
+                raise Exception
+
+            getattr(obj, func)(json.loads(data))
+
+    sc_data.process()
+    sim_data.process()
+
+    print('Read and parsed all data, plotting - len=%d' % len(sc_data.cur['t']))
 
     plot_all(sc_data, sim_data)
 
