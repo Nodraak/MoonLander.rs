@@ -53,8 +53,8 @@ impl Spacecraft {
         assert!(-5.0*PI/180.0 <= self.cur.ang_vel);
         assert!(self.cur.ang_vel <= 5.0*PI/180.0);
 
-        assert!(-1.0*PI/180.0 <= self.cur.ang_acc);
-        assert!(self.cur.ang_acc <= 1.0*PI/180.0);
+        assert!(-5.0*PI/180.0 <= self.cur.ang_acc);
+        assert!(self.cur.ang_acc <= 5.0*PI/180.0);
     }
 
     pub fn export_to_csv_conf(&self) {
