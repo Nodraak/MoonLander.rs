@@ -124,9 +124,9 @@ fn control_angular(conf: &Scenario, dt: f64, ctr_ang_pos: f64, sc_mass: f64, sc_
 
     let mut ctr_eng_gimbal = sin_gimbal.asin();
 
-    let eng_gimbal_err = ctr_eng_gimbal - eng_gimbal_cur;
-    if eng_gimbal_err.abs() > conf.ctr_eng_gimbal_vel_max {
-        ctr_eng_gimbal = eng_gimbal_cur + sign(eng_gimbal_err)*conf.ctr_eng_gimbal_vel_max*dt;
+    let eng_gimbal_vel = (ctr_eng_gimbal - eng_gimbal_cur)/dt;
+    if eng_gimbal_vel.abs() > conf.ctr_eng_gimbal_vel_max {
+        ctr_eng_gimbal = eng_gimbal_cur + sign(eng_gimbal_vel)*conf.ctr_eng_gimbal_vel_max*dt;
     }
 
     ctr_eng_gimbal = saturate(ctr_eng_gimbal, -conf.ctr_eng_gimbal_pos_max, conf.ctr_eng_gimbal_pos_max);

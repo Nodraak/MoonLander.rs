@@ -49,7 +49,7 @@ class SpacecraftData:
             self.conf['ctr_eng_gimbal_pos_max']*eng_gimbal for eng_gimbal in self.cur['eng_gimbal']
         ]
 
-        self.processed['eng_gimbal_vel'] = [0] + list(np.diff(self.processed['eng_gimbal']))
+        self.processed['eng_gimbal_vel'] = [0] + list(np.diff(self.processed['eng_gimbal'])/self.cur['dt'][0])
 
 
 def rad2deg(rads):
@@ -178,7 +178,7 @@ def plot_all(sc_data, sim_data, save_to_file=None):
 
     subplot_plot_twin_axis(
         3, 1, 2, xs, [
-            ('gimbal pos (deg)', (rad2deg(sc_data.cur['eng_gimbal']), rad2deg(sim_data.cur['eng_gimbal'])), 0),
+            ('gimbal pos (deg)', (rad2deg(sc_data.processed['eng_gimbal']), rad2deg(sim_data.processed['eng_gimbal'])), 0),
             ('gimbal vel (deg/sec)', (rad2deg(sc_data.processed['eng_gimbal_vel']), rad2deg(sim_data.processed['eng_gimbal_vel'])), 0),
         ],
         align_yaxis=True,

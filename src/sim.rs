@@ -85,6 +85,7 @@ impl Sim {
         // save everything
 
         self.cur.t = t;
+        self.cur.dt = dt;
 
         self.cur.eng_throttle = control.engine_throttle;
         self.cur.fuel_mass = sc_fuel_mass;
