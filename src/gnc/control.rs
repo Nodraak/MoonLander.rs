@@ -17,10 +17,10 @@ pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
     let goal_acc = spacecraft.cur.gui;
 
     let (ctr_sc_thrust, ctr_ang_pos) = match conf.ctr_spacecraft {
-        CtrSpacecraft::CtrSpacecraftDescent => {
+        CtrSpacecraft::CtrSpacecraftDescent | CtrSpacecraft::CtrSpacecraftAscentToHover => {
             control_translation(goal_acc, sc_mass, sc_thrust)
         },
-        CtrSpacecraft::CtrSpacecraftAscent => {
+        CtrSpacecraft::CtrSpacecraftAscentToOrbit => {
             // to avoid a dangerously big angular command, perform a nice constant pitch rate
 
             let tf = 30.0;

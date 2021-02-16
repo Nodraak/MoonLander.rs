@@ -27,7 +27,8 @@ pub enum TgoEstimate {
 #[derive(Serialize, Deserialize)]
 pub enum GuiSpacecraft {
     GuiDescent,
-    GuiAscent,
+    GuiAscentToOrbit,
+    GuiAscentToHover,
 }
 
 #[derive(Clone, Copy)]
@@ -35,7 +36,8 @@ pub enum GuiSpacecraft {
 #[derive(Serialize, Deserialize)]
 pub enum CtrSpacecraft {
     CtrSpacecraftDescent,
-    CtrSpacecraftAscent,
+    CtrSpacecraftAscentToOrbit,
+    CtrSpacecraftAscentToHover,
 }
 
 

@@ -11,7 +11,8 @@ pub fn gui(spacecraft: &mut Spacecraft, tgo: f64) {
 
     let acc = match spacecraft.conf.s.gui_spacecraft {
         GuiSpacecraft::GuiDescent => gui_descent(spacecraft, tgo),
-        GuiSpacecraft::GuiAscent => gui_ascent(spacecraft, tgo),
+        GuiSpacecraft::GuiAscentToOrbit => gui_ascent_orbit(spacecraft, tgo),
+        GuiSpacecraft::GuiAscentToHover => gui_ascent_hover(spacecraft, tgo),
     };
 
     spacecraft.cur.gui = acc + Vec2 {
@@ -64,7 +65,7 @@ pub fn gui_descent(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 }
 
 
-/// Ascent guidance
+/// Ascent guidance to orbit (dont care about care about pf_x)
 ///
 /// x: Linear law:
 ///     acc = k1*t+k2
@@ -73,7 +74,7 @@ pub fn gui_descent(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 ///     acc = k1*t**2+k2*t+k3
 ///     acc = af -6/tgo*(v0+vf) + 12/tgo.powi(2)*(pf-p0)
 /// For more info, cf. https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/
-pub fn gui_ascent(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
+pub fn gui_ascent_orbit(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
     let conf = spacecraft.conf.s;
 
     // x
@@ -83,6 +84,47 @@ pub fn gui_ascent(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
     let acc_x = (
         -conf.gui_af_x
         + 2.0/tgo*(conf.gui_vf_x-v0_x)
+    );
+
+    // y
+
+    let v0_y = spacecraft.cur.vel.y;
+    let p0_y = spacecraft.cur.pos.y;
+
+    let acc_y = (
+        conf.gui_af_y
+        -6.0/tgo*(v0_y+conf.gui_vf_y)
+        + 12.0/tgo.powi(2)*(conf.gui_pf_y-p0_y)
+    );
+
+    // return
+
+    Vec2 {
+        x: acc_x,
+        y: acc_y,
+    }
+}
+
+/// Ascent guidance to hover (care about pf_x)
+///
+/// x: Linear law:
+///     acc = k1*t+k2
+///     acc = -2/tgo * (vf+2*v0) + 6/tgo**2*(pf-p0)
+/// y: Quadratic law:
+///     acc = k1*t**2+k2*t+k3
+///     acc = af -6/tgo*(v0+vf) + 12/tgo.powi(2)*(pf-p0)
+/// For more info, cf. https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/
+pub fn gui_ascent_hover(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
+    let conf = spacecraft.conf.s;
+
+    // x
+
+    let v0_x = spacecraft.cur.vel.x;
+    let p0_x = spacecraft.cur.pos.x;
+
+    let acc_x = (
+        -2.0/tgo * (conf.gui_vf_x+2.0*v0_x)
+        +6.0/tgo.powi(2)*(conf.gui_pf_x-p0_x)
     );
 
     // y

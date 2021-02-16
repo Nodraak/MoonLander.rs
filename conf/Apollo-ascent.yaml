@@ -42,5 +42,5 @@ tgo_method: "TgoEstimateUpdating"
 tgo_init: 0.0                       # used only with TgoEstimate::TgoGivenFixed
 tgo_thrust_mul: 1.1                 # used only with TgoEstimate::TgoEstimateFixed | TgoEstimate::TgoEstimateUpdating
 tgo_stop: 5.0
-gui_spacecraft: "GuiAscent"
-ctr_spacecraft: "CtrSpacecraftAscent"
+gui_spacecraft: "GuiAscentToOrbit"
+ctr_spacecraft: "CtrSpacecraftAscentToOrbit"
