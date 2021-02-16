@@ -11,20 +11,31 @@ import numpy as np
 MATPLOTLIB_FIGSIZE = (2*6.4, 2*4.8)
 
 
-class SpacecraftData:
+class SafeDict(dict):
     def __init__(self):
-        self.conf = None
-        self.cur = None
-        self.processed = None
+        self.fallback_val = None
+        super().__init__()
+
+    def set_fallback_val(self, fallback_val):
+        self.fallback_val = fallback_val
+
+    def __getitem__(self, key):
+        if (key in self) or (self.fallback_val is None):
+            return super().__getitem__(key)
+        else:
+            return self.fallback_val
+
+
+class SpacecraftData:
+    def __init__(self, ):
+        self.conf = SafeDict()
+        self.cur = SafeDict()
+        self.processed = SafeDict()
 
     def add_conf(self, conf):
-        assert self.conf is None
-        self.conf = conf
+        self.conf.update(conf)  # call self.conf method to avoid replacing SafeDict (self.conf) by dict (conf)
 
     def add_cur(self, cur):
-        if self.cur is None:
-            self.cur = {}
-
         for k1, v1 in cur.items():
             if isinstance(v1, dict):
                 for k2, v2 in v1.items():
@@ -39,8 +50,11 @@ class SpacecraftData:
                     self.cur[k1] = []
                 self.cur[k1].append(v1)
 
-    def process(self):
-        self.processed = {}
+    def process(self, length=None):
+        if length:
+            self.conf.set_fallback_val(1)
+            self.cur.set_fallback_val([1 for _ in range(length)])
+            self.processed.set_fallback_val([1 for _ in range(length)])
 
         self.processed['mass'] = [
             self.conf['sc_dry_mass']+fuel for fuel in self.cur['fuel_mass']
@@ -119,10 +133,10 @@ def subplot_plot_twin_axis(plot_rows, plot_cols, plot_id, xs, plot_spec, align_y
 
     assert len(plot_spec) in [1, 2]
 
-    for _label, curves, _horiz in plot_spec:
-        for curve in curves:
-            assert len(xs) == len(curve), \
-                "For curve %s , expected len(xs) == len(curve) but %d != %d" % (_label, len(xs), len(curve))
+    # for _label, curves, _horiz in plot_spec:
+    #     for curve in curves:
+    #         assert len(xs) == len(curve), \
+    #             "For curve %s , expected len(xs) == len(curve) but %d != %d" % (_label, len(xs), len(curve))
 
     COLORS_YLABEL = ['blue', 'red']
     COLORS_DATA = [['blue', 'darkblue'], ['red', 'darkred']]
@@ -160,9 +174,7 @@ def subplot_plot_twin_axis(plot_rows, plot_cols, plot_id, xs, plot_spec, align_y
     plt.xlim((xs[0], xs[-1]))
 
 
-def plot_all(sc_data, sim_data, save_to_file=None):
-    xs = sc_data.cur['t']
-
+def plot_all(sc_data, sim_data, xs):
     #
     # Figure 1 - ctr and ang
     #
@@ -171,15 +183,15 @@ def plot_all(sc_data, sim_data, save_to_file=None):
 
     subplot_plot_twin_axis(
         3, 1, 1, xs, [
-            ('eng_throttle (0-1)', (sc_data.cur['eng_throttle'], sim_data.cur['eng_throttle']), None),
+            ('ctr eng_throttle (0-1)', (sc_data.cur['eng_throttle'], sim_data.cur['eng_throttle']), None),
             ('mass (kg)', (sc_data.processed['mass'], sim_data.processed['mass']), None),
         ]
     )
 
     subplot_plot_twin_axis(
         3, 1, 2, xs, [
-            ('gimbal pos (deg)', (rad2deg(sc_data.processed['eng_gimbal']), rad2deg(sim_data.processed['eng_gimbal'])), 0),
-            ('gimbal vel (deg/sec)', (rad2deg(sc_data.processed['eng_gimbal_vel']), rad2deg(sim_data.processed['eng_gimbal_vel'])), 0),
+            ('ctr gimbal pos (deg)', (rad2deg(sc_data.processed['eng_gimbal']), rad2deg(sim_data.processed['eng_gimbal'])), 0),
+            ('ctr gimbal vel (deg/sec)', (rad2deg(sc_data.processed['eng_gimbal_vel']), rad2deg(sim_data.processed['eng_gimbal_vel'])), 0),
         ],
         align_yaxis=True,
     )
@@ -239,15 +251,15 @@ def plot_all(sc_data, sim_data, save_to_file=None):
     plt.savefig('output_nav.png')
 
     #
-    # Figure 3 - gui
+    # Figure 3 - gui and ctr
     #
 
     plt.figure(figsize=MATPLOTLIB_FIGSIZE)
 
-    subplot_plot_single_axis(
+    subplot_plot_twin_axis(
         1, 1, 1, xs, [
-            ('gui_x (m/s**2)', (sc_data.cur['gui_x'], sim_data.cur['gui_x'])),
-            ('gui_y (m/s**2)', (sc_data.cur['gui_y'], sim_data.cur['gui_y'])),
+            ('gui_x (m/s**2)', (sc_data.cur['gui_x'], sim_data.cur['gui_x']), 0),
+            ('gui_y (m/s**2)', (sc_data.cur['gui_y'], sim_data.cur['gui_y']), 0),
         ],
     )
 
@@ -282,11 +294,12 @@ def main():
             getattr(obj, func)(json.loads(data))
 
     sc_data.process()
-    sim_data.process()
+    xs = sc_data.cur['t']
+    sim_data.process(len(xs))
 
     print('Read and parsed all data, plotting - len=%d' % len(sc_data.cur['t']))
 
-    plot_all(sc_data, sim_data)
+    plot_all(sc_data, sim_data, xs)
 
     print('Plotted all data, showing')
     plt.show()
