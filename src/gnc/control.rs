@@ -105,13 +105,9 @@ fn control_translation(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f6
 fn control_angular(conf: &Scenario, dt: f64, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
     assert!(dt > 1e-6);
 
-    // ang PID, I=0, D using dpos' = -vel
-    let KP = 0.02;
-    let KD = 1.0;
-
     let err = (ctr_ang_pos - sc_ang_pos)/dt;
 
-    let ctr_ang_acc = err*KP + -sc_ang_vel*KD;
+    let ctr_ang_acc = err*conf.ctr_eng_gimbal_kp.unwrap() + -sc_ang_vel*conf.ctr_eng_gimbal_kd.unwrap();
 
     // compute torque for correction
 

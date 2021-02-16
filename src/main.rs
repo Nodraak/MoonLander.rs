@@ -108,7 +108,11 @@ fn main() {
     // handle cli args
 
     let f = std::fs::File::open(matches.value_of("config").unwrap()).unwrap();
-    let scenario: Scenario = serde_yaml::from_reader(f).unwrap();
+    let mut scenario: Scenario = serde_yaml::from_reader(f).unwrap();
+
+    // transformation function estimated with a power regression from simulation data
+    scenario.ctr_eng_gimbal_kp = Some(0.010 * 30.9597849182108*scenario.ctr_eng_gimbal_tau.powf(-1.68850242456822));
+    scenario.ctr_eng_gimbal_kd = Some(0.100 * 19.5872953220424*scenario.ctr_eng_gimbal_tau.powf(-0.784268123320289));
 
     match matches.subcommand() {
         ("sim", submatches) => {

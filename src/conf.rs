@@ -68,6 +68,10 @@ pub struct Scenario {
     pub gui_vf_y: f64,              // unit: m/s
     pub gui_pf_y: f64,              // unit: m
 
+    pub ctr_eng_gimbal_tau: f64,        // unit: s
+    pub ctr_eng_gimbal_kp: Option<f64>, // unit: -
+    pub ctr_eng_gimbal_kd: Option<f64>, // unit: -
+
     pub ctr_eng_gimbal_pos_max: f64,    // unit: rad
     pub ctr_eng_gimbal_vel_max: f64,    // unit: rad/s
 
