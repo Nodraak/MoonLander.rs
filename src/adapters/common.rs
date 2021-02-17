@@ -1,4 +1,5 @@
 use serde::{Serialize, Deserialize};
+use uom::si::f64::*;
 
 use crate::utils::math::Vec2;
 
@@ -14,13 +15,13 @@ pub trait Adapter {
 #[derive(Debug)]
 #[derive(Serialize, Deserialize)]
 pub struct SensorsValues {
-    pub dt_step: f64,
+    pub dt_step: Time,
 
     // from accelerometers
-    pub spacecraft_acc: Vec2,               // unit: m/s**2
-    pub spacecraft_ang_acc: f64,            // unit: rad/s**2
+    pub spacecraft_acc: Vec2<Acceleration>,
+    pub spacecraft_ang_acc: AngularAcceleration,
     // from radar altimeter
-    pub spacecraft_altitude: Option<f64>,   // unit: m
+    pub spacecraft_altitude: Option<Length>,
 
     // TODO heading
 }
@@ -29,8 +30,8 @@ pub struct SensorsValues {
 #[derive(Debug)]
 #[derive(Serialize, Deserialize)]
 pub struct ActuatorsValues {
-    pub engine_throttle: f64,   // unit: [0; 1] of max (nominal) thrust
-    pub engine_gimbal: f64,     // unit: [-1; 1] of max gimbal
+    pub engine_throttle: Ratio, // range: [0; 1] of max (nominal) thrust
+    pub engine_gimbal: Ratio,   // range: [-1; +1] of max gimbal
 
     // TODO heading
 }

@@ -1,9 +1,16 @@
 use std::f64::consts::PI;
 
+use uom::si::f64::*;
+use uom::si::acceleration::meter_per_second_squared;
+use uom::si::angle::{degree, radian};
+use uom::si::ratio::ratio;
+use uom::si::time::second;
+
+use crate::{sqrt, squared};
 use crate::adapters::common::ActuatorsValues;
 use crate::conf::{Scenario, CtrSpacecraft};
 use crate::gnc::common::Spacecraft;
-use crate::utils::math::{Vec2, deg2rad, sign, saturate};
+use crate::utils::math::{Vec2, sign, saturate};
 
 
 /// Main control function
@@ -13,31 +20,33 @@ pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
     let sc_thrust = conf.sc_nominal_thrust;
     let sc_ang_pos = spacecraft.cur.ang_pos;
     let sc_ang_vel = spacecraft.cur.ang_vel;
-    let eng_gimbal_cur = spacecraft.cur.eng_gimbal*conf.ctr_eng_gimbal_pos_max;
+    let eng_gimbal_cur: Angle = (spacecraft.cur.eng_gimbal*conf.ctr_eng_gimbal_pos_max).into();
     let goal_acc = spacecraft.cur.gui;
 
-    let (ctr_sc_thrust, ctr_ang_pos) = match conf.ctr_spacecraft {
+    let (ctr_sc_thrust, ctr_ang_pos): (Force, Angle) = match conf.ctr_spacecraft {
         CtrSpacecraft::CtrSpacecraftDescent | CtrSpacecraft::CtrSpacecraftAscentToHover => {
             control_translation(goal_acc, sc_mass, sc_thrust)
         },
         CtrSpacecraft::CtrSpacecraftAscentToOrbit => {
-            let (_thrust, ctr_ang_pos_optim) = control_translation(goal_acc, sc_mass, sc_thrust);
+            let (_thrust, ctr_ang_pos_optim): (Force, Angle) = control_translation(goal_acc, sc_mass, sc_thrust);
 
             // to avoid a dangerously big angular command, perform a nice constant pitch rate
-            let tf = 50.0;
+            let tf = Time::new::<second>(50.0);
 
             if spacecraft.cur.t > tf {
                 (sc_thrust, ctr_ang_pos_optim)
             } else {
                 let af = ctr_ang_pos_optim;
 
-                let ctr_ang_pos = deg2rad(90.0) - spacecraft.cur.t/tf*(deg2rad(90.0)-af);
+                let na: Angle = (spacecraft.cur.t/tf*(Angle::new::<degree>(90.0)-af)).into();
+
+                let ctr_ang_pos: Angle = Angle::new::<degree>(90.0) - na;
                 (sc_thrust, ctr_ang_pos)
             }
         },
     };
 
-    let ctr_eng_gimbal = control_angular(
+    let ctr_eng_gimbal: Angle = control_angular(
         &conf, spacecraft.cur.dt, ctr_ang_pos, sc_mass, sc_ang_pos, sc_ang_vel, eng_gimbal_cur,
     );
 
@@ -58,15 +67,17 @@ pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
 ///     spacecraft mass
 ///     engine max_thrust
 /// Output:
-///     commanded thrust (respecting engine constraints) as [0; 1] of max (nominal) thrust
+///     commanded thrust (respecting engine constraints)
 ///     commanded (ideal) (spacecraft) attitude angle
-fn control_translation(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f64) {
+fn control_translation(goal_acc: Vec2<Acceleration>, sc_mass: Mass, sc_thrust: Force) -> (Force, Angle) {
     // instead of wasting propelant, let gravity work
-    if goal_acc.y < 0.0 {
+    if goal_acc.y < Acceleration::new::<meter_per_second_squared>(0.0) {
         println!("WARN: gravity");
-        (sc_thrust, PI)
+        (sc_thrust, Angle::new::<radian>(PI))
     } else {
-        let mut ctr_thrust = (goal_acc.x.powi(2) + goal_acc.y.powi(2)).powf(0.5) * sc_mass;
+        let mut ctr_thrust: Force = Acceleration::new::<meter_per_second_squared>(
+            sqrt!(squared!(goal_acc.x) + squared!(goal_acc.y))
+        ) * sc_mass;
 
         let mut ctr_angle;
 
@@ -76,12 +87,12 @@ fn control_translation(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f6
         }
         // else, try to save what can be saved (fulfill y, best effort x)
         else {
-            println!("WARN: thrust norm {} times the available thrust", ctr_thrust/sc_thrust);
+            println!("WARN: thrust norm {} times the available thrust", (ctr_thrust/sc_thrust).get::<ratio>());
             ctr_thrust = sc_thrust;
 
             ctr_angle = (goal_acc.y*sc_mass/sc_thrust).asin();
-            if goal_acc.x < 0.0 {
-                ctr_angle = PI-ctr_angle;
+            if goal_acc.x < Acceleration::new::<meter_per_second_squared>(0.0) {
+                ctr_angle = Angle::new::<radian>(PI)-ctr_angle;
             }
         }
 
@@ -100,30 +111,35 @@ fn control_translation(goal_acc: Vec2, sc_mass: f64, sc_thrust: f64) -> (f64, f6
 ///     sc_mass or sc_moment_of_inertia
 ///     sc_eng_thrust, sc_eng_gimbal_current, sc_eng_gimbal_max
 /// Output:
-///     commanded (engine) gimbal_angle (respecting engine constraints) as [-1; 1] of max gimbal
+///     commanded (engine) gimbal_angle (respecting engine constraints)
 ///
-fn control_angular(conf: &Scenario, dt: f64, ctr_ang_pos: f64, sc_mass: f64, sc_ang_pos: f64, sc_ang_vel: f64, eng_gimbal_cur: f64) -> f64 {
-    assert!(dt > 1e-6);
+fn control_angular(conf: &Scenario, dt: Time, ctr_ang_pos: Angle, sc_mass: Mass, sc_ang_pos: Angle, sc_ang_vel: AngularVelocity, eng_gimbal_cur: Angle) -> Angle {
+    let kp: Frequency = conf.ctr_eng_gimbal_kp.unwrap();
+    let kd: Ratio = conf.ctr_eng_gimbal_kd.unwrap();
 
-    let err = (ctr_ang_pos - sc_ang_pos)/dt;
+    assert!(dt > Time::new::<second>(1e-6));
 
-    let ctr_ang_acc = err*conf.ctr_eng_gimbal_kp.unwrap() + -sc_ang_vel*conf.ctr_eng_gimbal_kd.unwrap();
+    let err: Angle = ctr_ang_pos - sc_ang_pos;
+    let control: AngularVelocity = (err*kp + sc_ang_vel*kd).into();
+
+    let ctr_ang_acc: AngularAcceleration = (control / Time::new::<second>(1.0)).into();  // small hack to respect Dimensional analysis
 
     // compute torque for correction
 
-    let sc_moment_of_inertia = 0.5 * sc_mass * (conf.sc_width/2.0).powi(2);  // 1/2*m*r**2 = kg.m**2
-    let ctr_torque = ctr_ang_acc * sc_moment_of_inertia;  // N*m = kg*m**2 * rad/sec**2
+    let sc_moment_of_inertia = 0.5 * sc_mass * squared!(conf.sc_width/2.0);  // 1/2*m*r**2 = kg.m**2
+    let ctr_torque: Torque = (ctr_ang_acc * sc_moment_of_inertia).into();  // N*m = kg*m**2 * rad/sec**2
 
     // compute engine gimbal
 
-    let sin_gimbal = ctr_torque/(conf.sc_height/2.0*conf.sc_nominal_thrust);  // Torque = L*F*sin(alpha)
-    assert!(sin_gimbal.abs() <= 1.0);
+    let sin_gimbal: Ratio = ctr_torque/(conf.sc_height/2.0*conf.sc_nominal_thrust);  // Torque = L*F*sin(alpha)
+    assert!(sin_gimbal.abs() <= Ratio::new::<ratio>(1.0));
 
-    let mut ctr_eng_gimbal = sin_gimbal.asin();
+    let mut ctr_eng_gimbal: Angle = sin_gimbal.asin();
 
-    let eng_gimbal_vel = (ctr_eng_gimbal - eng_gimbal_cur)/dt;
+    let eng_gimbal_vel: AngularVelocity = ((ctr_eng_gimbal - eng_gimbal_cur)/dt).into();
     if eng_gimbal_vel.abs() > conf.ctr_eng_gimbal_vel_max {
-        ctr_eng_gimbal = eng_gimbal_cur + sign(eng_gimbal_vel)*conf.ctr_eng_gimbal_vel_max*dt;
+        let inc: Angle = (sign(eng_gimbal_vel.value)*conf.ctr_eng_gimbal_vel_max*dt).into();
+        ctr_eng_gimbal = eng_gimbal_cur + inc;
     }
 
     ctr_eng_gimbal = saturate(ctr_eng_gimbal, -conf.ctr_eng_gimbal_pos_max, conf.ctr_eng_gimbal_pos_max);

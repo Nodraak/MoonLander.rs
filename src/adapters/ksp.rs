@@ -1,6 +1,13 @@
-use std::f64::consts::PI;
 use pyo3::prelude::*;
+use uom::si::f64::*;
+use uom::si::acceleration::meter_per_second_squared;
+use uom::si::angle::{degree, radian};
+use uom::si::angular_acceleration::radian_per_second_squared;
+use uom::si::ratio::ratio;
+use uom::si::time::second;
+use uom::si::velocity::meter_per_second;
 use crate::adapters::common::{Adapter, SensorsValues, ActuatorsValues};
+use crate::squared;
 use crate::utils::math::Vec2;
 
 
@@ -10,10 +17,10 @@ pub struct AdapterKSP<'py> {
     body_ref_frame: &'py PyAny,
     surface_ref_frame: &'py PyAny,
 
-    last_met: f64,          // seconds
-    last_vel_vert: f64,     // m/s
-    last_vel_horiz: f64,    // m/s
-    last_pitch: f64,        // rad - spacecraft's pitch, not velocity's
+    last_met: Time,
+    last_vel_vert: Velocity,
+    last_vel_horiz: Velocity,
+    last_pitch: Angle,                          // spacecraft's pitch, not velocity's
 }
 
 
@@ -45,10 +52,10 @@ fn init_<'py>(py: &'py Python) -> PyResult<AdapterKSP<'py>> {
         body_ref_frame: body_ref_frame,
         surface_ref_frame: surface_ref_frame,
 
-        last_met: 0.0,
-        last_vel_vert: 0.0,
-        last_vel_horiz: 0.0,
-        last_pitch: 0.0,
+        last_met: Time::new::<second>(0.0),
+        last_vel_vert: Velocity::new::<meter_per_second>(0.0),
+        last_vel_horiz: Velocity::new::<meter_per_second>(0.0),
+        last_pitch: Angle::new::<radian>(0.0),
     })
 }
 
@@ -67,36 +74,41 @@ impl Adapter for AdapterKSP<'_> {
 
         // Get raw data
 
-        let met = self.vessel
+        let met = Time::new::<second>(self.vessel
             .getattr("met").unwrap()
-            .extract().unwrap();
+            .extract().unwrap());
 
         let vel_ = self.vessel
             .call_method1("flight", (self.body_ref_frame, )).unwrap()
             .getattr("velocity").unwrap();
-        let (vel_vert, vel_north, vel_east): (f64, f64, f64) = self.conn
+        let vels: (f64, f64, f64) = self.conn
             .getattr("space_center").unwrap()
             .call_method1("transform_direction", (vel_, self.body_ref_frame, self.surface_ref_frame)).unwrap()
             .extract().unwrap();
-        let vel_horiz = (vel_north.powi(2) + vel_east.powi(2)).sqrt();
+        let vel_vert = Velocity::new::<meter_per_second>(vels.0);
+        let vel_north = Velocity::new::<meter_per_second>(vels.1);
+        let vel_east = Velocity::new::<meter_per_second>(vels.2);
 
-        let pitch = self.vessel
+        let vel_horiz = (squared!(vel_north) + squared!(vel_east)).sqrt();
+
+        let pitch = Angle::new::<degree>(self.vessel
             .call_method1("flight", (self.surface_ref_frame, )).unwrap()
             .getattr("pitch").unwrap()
-            .extract().unwrap();
+            .extract().unwrap());
 
         // Compute sensor data
 
-        let mut dt: f64 = met - self.last_met;
-        let mut acc_x = (vel_horiz-self.last_vel_horiz)/dt;
-        let mut acc_y = (vel_vert-self.last_vel_vert)/dt;
-        let mut ang_acc = (pitch-self.last_pitch)/dt * PI/180.0;  // KSP pitch is in deg, convert to rad
+        let mut dt: Time = met - self.last_met;
+        let mut acc_x: Acceleration = (vel_horiz-self.last_vel_horiz)/dt;
+        let mut acc_y: Acceleration = (vel_vert-self.last_vel_vert)/dt;
+        // let mut ang_acc: AngularAcceleration = (pitch-self.last_pitch)/dt;  // TODO
+        let mut ang_acc: AngularAcceleration = AngularAcceleration::new::<radian_per_second_squared>(0.0);
 
-        if (dt.abs() < 0.001) || (dt.abs() > 1.000) {
-            acc_x = 0.0;
-            acc_y = 0.0;
-            ang_acc = 0.0;
-            dt = 1.0;
+        if (dt.abs() < Time::new::<second>(0.001)) || (dt.abs() > Time::new::<second>(1.000)) {
+            dt = Time::new::<second>(1.0);
+            acc_x = Acceleration::new::<meter_per_second_squared>(0.0);
+            acc_y = Acceleration::new::<meter_per_second_squared>(0.0);
+            ang_acc = AngularAcceleration::new::<radian_per_second_squared>(0.0);
         }
 
         // Update internal state and return
@@ -117,8 +129,8 @@ impl Adapter for AdapterKSP<'_> {
     fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
         let ves_control = self.vessel.getattr("control").unwrap();
 
-        ves_control.setattr("throttle", control.engine_throttle).unwrap();
-        ves_control.setattr("pitch", control.engine_gimbal).unwrap();
+        ves_control.setattr("throttle", control.engine_throttle.get::<ratio>()).unwrap();
+        ves_control.setattr("pitch", control.engine_gimbal.get::<ratio>()).unwrap();
 
         Ok(())
     }

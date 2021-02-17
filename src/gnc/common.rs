@@ -1,4 +1,13 @@
-use std::f64::consts::PI;
+use uom::si::f64::*;
+use uom::si::acceleration::meter_per_second_squared;
+use uom::si::angle::degree;
+use uom::si::angular_acceleration::degree_per_second_squared;
+use uom::si::angular_velocity::degree_per_second;
+use uom::si::length::meter;
+use uom::si::mass::kilogram;
+use uom::si::ratio::ratio;
+use uom::si::time::{minute, second};
+use uom::si::velocity::meter_per_second;
 
 use crate::conf::{Conf, SubCommand};
 use crate::utils::spacecraft::SpacecraftDynamic;
@@ -26,35 +35,35 @@ impl Spacecraft {
             return;
         }
 
-        assert!(0.0 <= self.cur.t);
-        assert!(self.cur.t < 15.0*60.0);
+        assert!(Time::new::<second>(0.0) <= self.cur.t);
+        assert!(self.cur.t < Time::new::<minute>(15.0));
 
-        assert!(-1.0 <= self.cur.eng_gimbal);
-        assert!(self.cur.eng_gimbal <= 1.0);
+        assert!(Ratio::new::<ratio>(-1.0) <= self.cur.eng_gimbal);
+        assert!(self.cur.eng_gimbal <= Ratio::new::<ratio>(1.0));
 
-        assert!(0.0 <= self.cur.eng_throttle);
-        assert!(self.cur.eng_throttle <= 1.0);
+        assert!(Ratio::new::<ratio>(0.0) <= self.cur.eng_throttle);
+        assert!(self.cur.eng_throttle <= Ratio::new::<ratio>(1.0));
 
-        assert!(0.0 <= self.cur.fuel_mass);
+        assert!(Mass::new::<kilogram>(0.0) <= self.cur.fuel_mass);
         assert!(self.cur.fuel_mass <= self.conf.s.initial_sc_fuel_mass);
 
-        assert!(0.0 <= self.cur.pos.y);
-        assert!(self.cur.pos.y <= 1_000_000.0);
+        assert!(Length::new::<meter>(0.0) <= self.cur.pos.y);
+        assert!(self.cur.pos.y <= Length::new::<meter>(1_000_000.0));
 
-        assert!(self.cur.vel.x.abs() < 10_000.0);
-        assert!(self.cur.vel.y.abs() < 1_000.0);
+        assert!(self.cur.vel.x.abs() < Velocity::new::<meter_per_second>(10_000.0));
+        assert!(self.cur.vel.y.abs() < Velocity::new::<meter_per_second>(1_000.0));
 
-        assert!(self.cur.acc.x.abs() < 100.0);
-        assert!(self.cur.acc.y.abs() < 100.0);
+        assert!(self.cur.acc.x.abs() < Acceleration::new::<meter_per_second_squared>(100.0));
+        assert!(self.cur.acc.y.abs() < Acceleration::new::<meter_per_second_squared>(100.0));
 
-        assert!(-180.1*PI/180.0 <= self.cur.ang_pos);
-        assert!(self.cur.ang_pos <= 180.1*PI/180.0);
+        assert!(Angle::new::<degree>(-180.1) <= self.cur.ang_pos);
+        assert!(self.cur.ang_pos <= Angle::new::<degree>(180.1));
 
-        assert!(-5.0*PI/180.0 <= self.cur.ang_vel);
-        assert!(self.cur.ang_vel <= 5.0*PI/180.0);
+        assert!(AngularVelocity::new::<degree_per_second>(-5.0) <= self.cur.ang_vel);
+        assert!(self.cur.ang_vel <= AngularVelocity::new::<degree_per_second>(5.0));
 
-        assert!(-5.0*PI/180.0 <= self.cur.ang_acc);
-        assert!(self.cur.ang_acc <= 5.0*PI/180.0);
+        assert!(AngularAcceleration::new::<degree_per_second_squared>(-5.0) <= self.cur.ang_acc);
+        assert!(self.cur.ang_acc <= AngularAcceleration::new::<degree_per_second_squared>(5.0));
     }
 
     pub fn export_to_csv_conf(&self) {

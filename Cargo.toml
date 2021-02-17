@@ -8,7 +8,9 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33"
+lazy_static = "1.4"
 pyo3 = { version = "0.13", features = ["auto-initialize"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.8"
+uom = { version = "0.30", features = ["use_serde"] }

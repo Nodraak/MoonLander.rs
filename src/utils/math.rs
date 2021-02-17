@@ -1,5 +1,4 @@
-use std::f64::consts::PI;
-use std::ops::{Add, Sub, AddAssign, Mul};
+use std::ops::{Add, Sub, AddAssign};
 
 use serde::{Serialize, Deserialize};
 
@@ -7,27 +6,13 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug)]
 #[derive(Clone, Copy)]
 #[derive(Serialize, Deserialize)]
-pub struct Vec2 {
-    pub x: f64,  // horizontal axis
-    pub y: f64,  // vertical axis
+pub struct Vec2<T> {
+    pub x: T,   // horizontal axis
+    pub y: T,   // vertical axis
 }
 
 
-impl Vec2 {
-    pub fn new_polar(norm: f64, angle: f64) -> Vec2 {
-        Vec2 {
-            x: norm * angle.cos(),
-            y: norm * angle.sin(),
-        }
-    }
-
-    pub fn norm(self) -> f64 {
-        (self.x*self.x + self.y*self.y).powf(0.5)
-    }
-}
-
-
-impl Add for Vec2 {
+impl<T: std::ops::Add<Output = T>> Add for Vec2<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -39,7 +24,7 @@ impl Add for Vec2 {
 }
 
 
-impl Sub for Vec2 {
+impl<T: std::ops::Sub<Output = T>> Sub for Vec2<T> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -51,28 +36,11 @@ impl Sub for Vec2 {
 }
 
 
-impl AddAssign for Vec2 {
+impl<T: std::ops::AddAssign> AddAssign for Vec2<T> {
     fn add_assign(&mut self, other: Self) {
         self.x += other.x;
         self.y += other.y;
     }
-}
-
-
-impl Mul<f64> for Vec2 {
-    type Output = Self;
-
-    fn mul(self, other: f64) -> Self {
-        Self {
-            x: self.x * other,
-            y: self.y * other,
-        }
-    }
-}
-
-
-pub fn deg2rad(deg: f64) -> f64 {
-    deg*PI/180.0
 }
 
 
@@ -85,7 +53,7 @@ pub fn sign(val: f64) -> f64 {
 }
 
 
-pub fn saturate(val: f64, min: f64, max: f64) -> f64 {
+pub fn saturate<T: std::cmp::PartialOrd>(val: T, min: T, max: T) -> T {
     if val < min {
         min
     } else if max < val {

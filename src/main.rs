@@ -13,6 +13,12 @@ use clap;
 use pyo3::prelude::*;
 use serde_json;
 use serde_yaml;
+use uom::si::f64::*;
+use uom::si::ratio::ratio;
+use uom::si::frequency::hertz;
+use uom::si::time::second;
+use uom::si::velocity::meter_per_second;
+
 use crate::conf::{Scenario, Conf, TgoEstimate, SubCommand};
 use crate::gnc::common::Spacecraft;
 use crate::utils::space::{tgo_estimate, has_softly_landed};
@@ -21,7 +27,7 @@ use crate::utils::space::{tgo_estimate, has_softly_landed};
 fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
     let mut sc = Spacecraft::new(conf);
 
-    let mut tgo = match conf.s.tgo_method {
+    let mut tgo: Time = match conf.s.tgo_method {
         TgoEstimate::TgoGivenFixed => {
             conf.s.tgo_init
         },
@@ -38,7 +44,7 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
             tgo = tgo_estimate(&sc, sc.conf.s.gui_vf_x, sc.conf.s.gui_vf_y, sc.conf.s.tgo_thrust_mul);
         }
 
-        println!("[LOGD:land] tgo={:.3}", tgo);
+        println!("[LOGD:land] tgo={:.3}", tgo.get::<second>());
 
         // inputs, gnc, outputs
 
@@ -70,7 +76,7 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
         // time
 
         tgo -= sensors_vals.dt_step;
-        thread::sleep(time::Duration::from_millis((conf.dt_sleep*1000.0) as u64));
+        thread::sleep(time::Duration::from_secs_f64(conf.dt_sleep.get::<second>()));
     }
 
     if has_softly_landed(&sc) {
@@ -79,7 +85,7 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
         println!("Landing is FAILED");
     }
 
-    println!("spacecraft.dv: {:.1} m/s", sc.cur.dv);
+    println!("spacecraft.dv: {:.1} m/s", sc.cur.dv.get::<meter_per_second>());
 }
 
 
@@ -111,16 +117,20 @@ fn main() {
     let mut scenario: Scenario = serde_yaml::from_reader(f).unwrap();
 
     // transformation function estimated with a power regression from simulation data
-    scenario.ctr_eng_gimbal_kp = Some(0.010 * 30.9597849182108*scenario.ctr_eng_gimbal_tau.powf(-1.68850242456822));
-    scenario.ctr_eng_gimbal_kd = Some(0.100 * 19.5872953220424*scenario.ctr_eng_gimbal_tau.powf(-0.784268123320289));
+    scenario.ctr_eng_gimbal_kp = Some(Frequency::new::<hertz>(
+        3.09597849182108*scenario.ctr_eng_gimbal_tau.get::<second>().powf(-1.68850242456822)
+    ));
+    scenario.ctr_eng_gimbal_kd = Some(Ratio::new::<ratio>(
+        -1.95872953220424*scenario.ctr_eng_gimbal_tau.get::<second>().powf(-0.784268123320289)
+    ));
 
     match matches.subcommand() {
         ("sim", submatches) => {
             println!("Subcommand: sim");
 
-            let dt_step = 0.100;
+            let dt_step = Time::new::<second>(0.100);
 
-            let conf = Conf::new(SubCommand::Sim, dt_step, 0.0, scenario);
+            let conf = Conf::new(SubCommand::Sim, dt_step, Time::new::<second>(0.0), scenario);
 
             let mut adapter = adapters::sim::init(conf).unwrap();  // TODO handle error
 
@@ -129,12 +139,12 @@ fn main() {
         ("ksp", submatches) => {
             println!("Subcommand: ksp");
 
-            let dt_sleep = 0.500;
+            let dt_sleep = Time::new::<second>(0.100);
 
             let gil = Python::acquire_gil();
             let py = gil.python();
 
-            let conf = Conf::new(SubCommand::Ksp, 0.0, dt_sleep, scenario);
+            let conf = Conf::new(SubCommand::Ksp, Time::new::<second>(0.0), dt_sleep, scenario);
 
             let mut adapter = adapters::ksp::init(&py).unwrap();  // TODO handle error
 

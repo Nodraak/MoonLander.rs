@@ -1,9 +1,12 @@
+use uom::si::f64::*;
+use uom::si::acceleration::meter_per_second_squared;
 use crate::conf::GuiSpacecraft;
 use crate::gnc::common::Spacecraft;
+use crate::squared;
 use crate::utils::math::Vec2;
 
 
-pub fn gui(spacecraft: &mut Spacecraft, tgo: f64) {
+pub fn gui(spacecraft: &mut Spacecraft, tgo: Time) {
     let body_acc_y = (
         -spacecraft.conf.s.body.gravity(spacecraft.cur.pos.y)
         +spacecraft.conf.s.body.centrifugal(spacecraft.cur.vel.x, spacecraft.cur.pos.y)
@@ -16,7 +19,7 @@ pub fn gui(spacecraft: &mut Spacecraft, tgo: f64) {
     };
 
     spacecraft.cur.gui = acc + Vec2 {
-        x: 0.0,
+        x: Acceleration::new::<meter_per_second_squared>(0.0),
         y: -body_acc_y,
     }
 }
@@ -31,7 +34,7 @@ pub fn gui(spacecraft: &mut Spacecraft, tgo: f64) {
 ///     acc = k1*t**2+k2*t+k3
 ///     acc = af -6/tgo*(v0+vf) + 12/tgo.powi(2)*(pf-p0)
 /// For more info, cf. https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/
-pub fn gui_descent(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
+pub fn gui_descent(spacecraft: &Spacecraft, tgo: Time) -> Vec2<Acceleration> {
     let conf = spacecraft.conf.s;
 
     // x
@@ -42,7 +45,7 @@ pub fn gui_descent(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
     let acc_x = (
         conf.gui_af_x
         -6.0/tgo*(v0_x+conf.gui_vf_x)
-        + 12.0/tgo.powi(2)*(conf.gui_pf_x-p0_x)
+        + 12.0/squared!(tgo)*(conf.gui_pf_x-p0_x)
     );
 
     // y
@@ -53,7 +56,7 @@ pub fn gui_descent(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
     let acc_y = (
         conf.gui_af_y
         -6.0/tgo*(v0_y+conf.gui_vf_y)
-        + 12.0/tgo.powi(2)*(conf.gui_pf_y-p0_y)
+        + 12.0/squared!(tgo)*(conf.gui_pf_y-p0_y)
     );
 
     // return
@@ -74,7 +77,7 @@ pub fn gui_descent(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 ///     acc = k1*t**2+k2*t+k3
 ///     acc = af -6/tgo*(v0+vf) + 12/tgo.powi(2)*(pf-p0)
 /// For more info, cf. https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/
-pub fn gui_ascent_orbit(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
+pub fn gui_ascent_orbit(spacecraft: &Spacecraft, tgo: Time) -> Vec2<Acceleration> {
     let conf = spacecraft.conf.s;
 
     // x
@@ -94,7 +97,7 @@ pub fn gui_ascent_orbit(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
     let acc_y = (
         conf.gui_af_y
         -6.0/tgo*(v0_y+conf.gui_vf_y)
-        + 12.0/tgo.powi(2)*(conf.gui_pf_y-p0_y)
+        + 12.0/squared!(tgo)*(conf.gui_pf_y-p0_y)
     );
 
     // return
@@ -114,7 +117,7 @@ pub fn gui_ascent_orbit(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 ///     acc = k1*t**2+k2*t+k3
 ///     acc = af -6/tgo*(v0+vf) + 12/tgo.powi(2)*(pf-p0)
 /// For more info, cf. https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/
-pub fn gui_ascent_hover(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
+pub fn gui_ascent_hover(spacecraft: &Spacecraft, tgo: Time) -> Vec2<Acceleration> {
     let conf = spacecraft.conf.s;
 
     // x
@@ -124,7 +127,7 @@ pub fn gui_ascent_hover(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
 
     let acc_x = (
         -2.0/tgo * (conf.gui_vf_x+2.0*v0_x)
-        +6.0/tgo.powi(2)*(conf.gui_pf_x-p0_x)
+        +6.0/squared!(tgo)*(conf.gui_pf_x-p0_x)
     );
 
     // y
@@ -135,7 +138,7 @@ pub fn gui_ascent_hover(spacecraft: &Spacecraft, tgo: f64) -> Vec2 {
     let acc_y = (
         conf.gui_af_y
         -6.0/tgo*(v0_y+conf.gui_vf_y)
-        + 12.0/tgo.powi(2)*(conf.gui_pf_y-p0_y)
+        + 12.0/squared!(tgo)*(conf.gui_pf_y-p0_y)
     );
 
     // return
