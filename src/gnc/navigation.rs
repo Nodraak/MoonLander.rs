@@ -1,5 +1,6 @@
 use std::f64::consts::PI;
 use uom::si::f64::*;
+use uom::si::angle::degree;
 use uom::si::velocity::meter_per_second;
 
 use crate::{mul, norm, sqrt, squared};
@@ -41,6 +42,13 @@ pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: &SensorsValues) {
     spacecraft.cur.ang_vel += dav;
     let dap: Angle = (spacecraft.cur.ang_vel*dt).into();
     spacecraft.cur.ang_pos += dap;
+
+    while spacecraft.cur.ang_pos > Angle::new::<degree>(180.0) {
+        spacecraft.cur.ang_pos -= Angle::new::<degree>(360.0);
+    }
+    while spacecraft.cur.ang_pos < -Angle::new::<degree>(180.0) {
+        spacecraft.cur.ang_pos += Angle::new::<degree>(360.0);
+    }
 
     // TODO cross check altitude - kalman filter?
 
