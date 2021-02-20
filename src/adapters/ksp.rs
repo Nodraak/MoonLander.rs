@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use serde::{Serialize, Deserialize};
 use uom::si::f64::*;
 use uom::si::acceleration::meter_per_second_squared;
 use uom::si::angle::{degree, radian};
@@ -23,6 +24,23 @@ pub struct AdapterKSP<'py> {
     last_vel_horiz: Velocity,
     last_ang_pos: Angle,                        // spacecraft's pitch, not velocity's
     last_ang_vel: AngularVelocity,
+}
+
+
+#[derive(Serialize, Deserialize)]
+struct RawSensorsValues {
+    met: Time,
+    vel_vert: Velocity,
+    vel_north: Velocity,
+    vel_east: Velocity,
+    ang_pos: Angle,
+}
+
+
+impl RawSensorsValues {
+    fn export_to_csv(self) {
+        println!("[LOGD:ksp::export_to_csv] CSV={}", serde_json::to_string(&self).unwrap());
+    }
 }
 
 
@@ -98,6 +116,16 @@ impl Adapter for AdapterKSP<'_> {
             .call_method1("flight", (self.surface_ref_frame, )).unwrap()
             .getattr("pitch").unwrap()
             .extract().unwrap());
+
+        let rsv = RawSensorsValues {
+            met: met,
+            vel_vert: vel_vert,
+            vel_north: vel_north,
+            vel_east: vel_east,
+            ang_pos: ang_pos,
+        };
+
+        rsv.export_to_csv();
 
         // Compute sensor data
 
