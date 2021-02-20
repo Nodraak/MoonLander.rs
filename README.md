@@ -12,8 +12,8 @@ This repo comes with a simulator to verify the guidance before attempting a land
 **Overview**
 
 1. The plan (From https://blog.nodraak.fr/2020/08/aerospace-sim-1-preliminary-study/): ![](docs/images/Architecture.svg)
-2. The first prototype: <https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/>
-3. The final implementation: this repo
+2. The first (Python) prototype: <https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/>
+3. The final (Rust) implementation: this repo
 
 **Implementation**
 
@@ -22,7 +22,7 @@ GNC is implemented in Rust.
 I/O will be implemented via adapters (to be able to swap between the simulator and KSP):
 
 * Simulator: direct (Rust) function calls
-* KSP: calling Python from Rust (https://github.com/PyO3/pyo3), itself calling Krpc lib (protobuf to KSP) (https://krpc.github.io/krpc/)
+* KSP: calling Python from Rust (https://github.com/PyO3/pyo3), itself calling kRPC lib (protobuf to KSP) (https://krpc.github.io/krpc/)
 
 ## Building and running
 
@@ -31,7 +31,7 @@ I/O will be implemented via adapters (to be able to swap between the simulator a
 * Rust (and a few crates)
 * For the `ksp` subcommand:
     * KSP game
-    * Krpc addon: `sudo pip3 install krpc`
+    * kRPC addon: `sudo pip3 install krpc`
 
 **Building**
 
@@ -45,12 +45,20 @@ Sim:
 
 KSP:
 
-1. Start KSP and Krpc
+1. Start KSP and kRPC
 2. `cargo run -- -c conf/Apollo-descent.yaml ksp`
+
+Available scenarios:
+
+* Apollo descent
+* Apollo ascent
+* Test Mission 1: 150 m hop
+    * Ascent (takeoff)
+    * Descent (landing)
 
 **Plotting**
 
-You can pipe moon_lander's stdout to plotter.py: `cargo run -- -c conf/Apollo-descent.yaml sim | py plotter.py `.
+You can pipe moon_lander's stdout to plotter.py: `cargo run -- -c conf/Apollo-descent.yaml sim | py plotter.py`.
 It will run MoonLander, then show some curves.
 The graphs will also be saved as `output.png`.
 
