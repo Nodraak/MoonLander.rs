@@ -23,7 +23,7 @@
     * [ok] Implement conf settings + load from yaml
     * [ok] Refacto gui to allow several guidance methods (tgo landing, tgo ascent, fixed ascent)
     * [ok] Spacecraft angle / Engine gimbal PID
-    * Rework sim to use 3D coordinates (simple PID to nullify the 3rd dimension?)
+    * [wip?] Rework sim to use 3D coordinates (simple PID to nullify the 3rd dimension?)
 2. KSP
     * [ok] Rust I/O adapters prototypes (rust for Sim, Python for Krcp) -> Adapter trait
     * [ok] Setup KSP addons
@@ -31,13 +31,16 @@
     * [ok] Error handling (Nan, div by zero, etc)
     * [wip] Test whole I/O chain (read & write)
 3. Start Nodraak's space program on KSP
-    * [wip] Update lander spec
+    * [ok] Update lander spec
     * Test launch (orbitial or suborbital, with or without landing)
     * Land on the Mun!
 4. Write some blog articles
     * TODO blog:
         * Add disclaimer about Exomars and PTS at top of every Aerospace article
         * Rehost pdfs to prevent 404
-    * Double PID for rotation control from the engine gimbal
-    * KSP lander
+    * [ok] Guidance: tgo based guidance
+    * Control: double PID for rotation control from the engine gimbal
+    * uom
+    * KSP lander: how to design a rocket
+    * Navigation: radar altimeter: Kalman / custom fusion / Apollo fusion
     * Rust gnc and/or Performances for real-life implementation
