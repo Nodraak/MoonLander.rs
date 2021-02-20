@@ -45,6 +45,6 @@ ctr_eng_gimbal_vel_max: 0.017453  # 1 deg
 tgo_method: "TgoEstimateUpdating"
 tgo_init: 0.0                       # used only with TgoEstimate::TgoGivenFixed
 tgo_thrust_mul: 1.1                 # used only with TgoEstimate::TgoEstimateFixed | TgoEstimate::TgoEstimateUpdating
-tgo_stop: 5.0
+tgo_stop: 10.0
 gui_spacecraft: "GuiAscentToOrbit"
 ctr_spacecraft: "CtrSpacecraftAscentToOrbit"
