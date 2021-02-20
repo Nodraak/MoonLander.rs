@@ -99,7 +99,7 @@ impl Adapter for AdapterKSP<'_> {
     ///     rotation=vessel.surface_reference_frame,
     /// )
     /// velocity = vessel.flight(ex1_ref_frame).velocity
-    fn read_sensors(&mut self) -> Result<SensorsValues, &'static str> {
+    fn read_sensors(&mut self) -> SensorsValues {
 
         // Get raw data
 
@@ -159,21 +159,19 @@ impl Adapter for AdapterKSP<'_> {
         self.last_ang_pos = ang_pos;
         self.last_ang_vel = ang_vel;
 
-        Ok(SensorsValues {
+        SensorsValues {
             dt_step: dt,
             spacecraft_acc: Vec2 {x: acc_x, y: acc_y},
             spacecraft_ang_acc: ang_acc,
             spacecraft_altitude: None,  // TODO
-        })
+        }
     }
 
-    fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
+    fn write_actuators(&mut self, control: ActuatorsValues) {
         let ves_control = self.vessel.getattr("control").unwrap();
 
         ves_control.setattr("throttle", control.engine_throttle.get::<ratio>()).unwrap();
-        ves_control.setattr("pitch", control.engine_gimbal.get::<ratio>()).unwrap();
-
-        Ok(())
+        ves_control.setattr("pitch", -control.engine_gimbal.get::<ratio>()).unwrap();
     }
 
     fn export_to_csv_conf(&self) {

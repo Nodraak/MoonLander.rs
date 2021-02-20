@@ -5,8 +5,8 @@ use crate::utils::math::Vec2;
 
 
 pub trait Adapter {
-    fn read_sensors(&mut self) -> Result<SensorsValues, &'static str>;
-    fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str>;
+    fn read_sensors(&mut self) -> SensorsValues;
+    fn write_actuators(&mut self, control: ActuatorsValues);
     fn export_to_csv_conf(&self);
     fn export_to_csv_cur(&self);
 }

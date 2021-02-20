@@ -48,7 +48,7 @@ fn land(adapter: &mut dyn adapters::common::Adapter, conf: Conf) {
 
         // inputs, gnc, outputs
 
-        let sensors_vals = adapter.read_sensors().unwrap();
+        let sensors_vals = adapter.read_sensors();
         println!("[LOGD:land] SensorsValues={}", serde_json::to_string(&sensors_vals).unwrap());
 
         gnc::navigation::nav(&mut sc, &sensors_vals);
@@ -125,7 +125,7 @@ fn main() {
     ));
 
     match matches.subcommand() {
-        ("sim", submatches) => {
+        ("sim", _submatches) => {
             println!("Subcommand: sim");
 
             let dt_step = Time::new::<second>(0.100);
@@ -136,7 +136,7 @@ fn main() {
 
             land(&mut adapter, conf);
         },
-        ("ksp", submatches) => {
+        ("ksp", _submatches) => {
             println!("Subcommand: ksp");
 
             let dt_sleep = Time::new::<second>(0.100);

@@ -29,11 +29,11 @@ fn init_(conf: Conf) -> Result<AdapterSim, &'static str> {
 }
 
 impl Adapter for AdapterSim {
-    fn read_sensors(&mut self) -> Result<SensorsValues, &'static str> {
+    fn read_sensors(&mut self) -> SensorsValues {
         self.sim.read_sensors()
     }
 
-    fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
+    fn write_actuators(&mut self, control: ActuatorsValues) {
         self.sim.write_actuators(control)
     }
 

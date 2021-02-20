@@ -30,16 +30,16 @@ impl Sim {
         }
     }
 
-    pub fn read_sensors(&self) -> Result<SensorsValues, &'static str> {
-        Ok(SensorsValues {
+    pub fn read_sensors(&self) -> SensorsValues {
+        SensorsValues {
             dt_step: self.dt,
             spacecraft_acc: self.cur.acc,
             spacecraft_ang_acc: self.cur.ang_acc,
             spacecraft_altitude: Some(self.cur.pos.y),
-        })
+        }
     }
 
-    pub fn write_actuators(&mut self, control: ActuatorsValues) -> Result<(), &'static str> {
+    pub fn write_actuators(&mut self, control: ActuatorsValues) {
         let dt = self.dt;
         let sc_mass = self.conf.sc_dry_mass + self.cur.fuel_mass;
 
@@ -125,8 +125,6 @@ impl Sim {
         self.cur.ang_acc = sc_ang_acc;
 
         self.all.push(self.cur);
-
-        Ok(())
     }
 
     pub fn export_to_csv_conf(&self) {
