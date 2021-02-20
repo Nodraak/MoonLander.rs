@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 use uom::si::f64::*;
 use uom::si::acceleration::meter_per_second_squared;
 use uom::si::angle::{degree, radian};
+use uom::si::angular_velocity::radian_per_second;
 use uom::si::angular_acceleration::radian_per_second_squared;
 use uom::si::ratio::ratio;
 use uom::si::time::second;
@@ -20,7 +21,8 @@ pub struct AdapterKSP<'py> {
     last_met: Time,
     last_vel_vert: Velocity,
     last_vel_horiz: Velocity,
-    last_pitch: Angle,                          // spacecraft's pitch, not velocity's
+    last_ang_pos: Angle,                        // spacecraft's pitch, not velocity's
+    last_ang_vel: AngularVelocity,
 }
 
 
@@ -55,7 +57,8 @@ fn init_<'py>(py: &'py Python) -> PyResult<AdapterKSP<'py>> {
         last_met: Time::new::<second>(0.0),
         last_vel_vert: Velocity::new::<meter_per_second>(0.0),
         last_vel_horiz: Velocity::new::<meter_per_second>(0.0),
-        last_pitch: Angle::new::<radian>(0.0),
+        last_ang_pos: Angle::new::<radian>(0.0),
+        last_ang_vel: AngularVelocity::new::<radian_per_second>(0.0),
     })
 }
 
@@ -91,7 +94,7 @@ impl Adapter for AdapterKSP<'_> {
 
         let vel_horiz = (squared!(vel_north) + squared!(vel_east)).sqrt();
 
-        let pitch = Angle::new::<degree>(self.vessel
+        let ang_pos = Angle::new::<degree>(self.vessel
             .call_method1("flight", (self.surface_ref_frame, )).unwrap()
             .getattr("pitch").unwrap()
             .extract().unwrap());
@@ -101,13 +104,14 @@ impl Adapter for AdapterKSP<'_> {
         let mut dt: Time = met - self.last_met;
         let mut acc_x: Acceleration = (vel_horiz-self.last_vel_horiz)/dt;
         let mut acc_y: Acceleration = (vel_vert-self.last_vel_vert)/dt;
-        // let mut ang_acc: AngularAcceleration = (pitch-self.last_pitch)/dt;  // TODO
-        let mut ang_acc: AngularAcceleration = AngularAcceleration::new::<radian_per_second_squared>(0.0);
+        let mut ang_vel: AngularVelocity = ((ang_pos-self.last_ang_pos)/dt).into();
+        let mut ang_acc: AngularAcceleration = ((ang_vel-self.last_ang_vel)/dt).into();
 
         if (dt.abs() < Time::new::<second>(0.001)) || (dt.abs() > Time::new::<second>(1.000)) {
             dt = Time::new::<second>(1.0);
             acc_x = Acceleration::new::<meter_per_second_squared>(0.0);
             acc_y = Acceleration::new::<meter_per_second_squared>(0.0);
+            ang_vel = AngularVelocity::new::<radian_per_second>(0.0);
             ang_acc = AngularAcceleration::new::<radian_per_second_squared>(0.0);
         }
 
@@ -116,7 +120,8 @@ impl Adapter for AdapterKSP<'_> {
         self.last_met = met;
         self.last_vel_vert = vel_vert;
         self.last_vel_horiz = vel_horiz;
-        self.last_pitch = pitch;
+        self.last_ang_pos = ang_pos;
+        self.last_ang_vel = ang_vel;
 
         Ok(SensorsValues {
             dt_step: dt,
