@@ -1,5 +1,8 @@
 use serde::{Serialize, Deserialize};
 use uom::si::f64::*;
+use uom::si::ratio::ratio;
+use uom::si::frequency::hertz;
+use uom::si::time::second;
 
 use crate::utils::math::Vec2;
 use crate::utils::bodies::Body;
@@ -87,6 +90,23 @@ pub struct Scenario {
                                         //    from diverging to +/- inf
     pub gui_spacecraft: GuiSpacecraft,
     pub ctr_spacecraft: CtrSpacecraft,
+}
+
+impl Scenario {
+    pub fn load(filepath: &str) -> Self {
+        let f = std::fs::File::open(filepath).unwrap();
+        let mut scenario: Scenario = serde_yaml::from_reader(f).unwrap();
+
+        // transformation function estimated with a power regression from simulation data
+        scenario.ctr_eng_gimbal_kp = Some(Frequency::new::<hertz>(
+            3.09597849182108*scenario.ctr_eng_gimbal_tau.get::<second>().powf(-1.68850242456822)
+        ));
+        scenario.ctr_eng_gimbal_kd = Some(Ratio::new::<ratio>(
+            -1.95872953220424*scenario.ctr_eng_gimbal_tau.get::<second>().powf(-0.784268123320289)
+        ));
+
+        scenario
+    }
 }
 
 
