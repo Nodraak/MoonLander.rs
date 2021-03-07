@@ -60,36 +60,55 @@ pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: &SensorsValues) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use serde_yaml;
+    use uom::si::acceleration::meter_per_second_squared;
+    use uom::si::angular_acceleration::degree_per_second_squared;
+    use uom::si::length::meter;
+    use uom::si::time::second;
+
     use crate::utils::math::Vec2;
+    use crate::conf::{SubCommand, Scenario, Conf};
 
     #[test]
     fn test_nav_1() {
-        let mut sc = Spacecraft::new();
+        let f = std::fs::File::open("conf/Apollo-descent.yaml").unwrap();  // TODO conf file for tests
+        let scenario: Scenario = serde_yaml::from_reader(f).unwrap();
+        let conf = Conf::new(SubCommand::Sim, Time::new::<second>(1.0), Time::new::<second>(1.0), scenario);
+
+        let mut sc = Spacecraft::new(conf);
+        sc.cur.pos.x = Length::new::<meter>(0.0);  // TODO conf file for tests
 
         nav(&mut sc, &SensorsValues {
-            dt_step: 1.0,
-            spacecraft_acc: Vec2 {x: 1.0, y: 2.0},
-            spacecraft_ang_acc: 0.0,
+            dt_step: Time::new::<second>(1.0),
+            spacecraft_acc: Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(1.0),
+                y: Acceleration::new::<meter_per_second_squared>(2.0),
+            },
+            spacecraft_ang_acc: AngularAcceleration::new::<degree_per_second_squared>(0.0),
             spacecraft_altitude: None,
         });
-        assert_eq!(sc.cur.acc.x, 1.0);
-        assert_eq!(sc.cur.vel.x, 1_673.0+1.0);
-        assert_eq!(sc.cur.pos.x, 1_673.0+1.0);
-        assert_eq!(sc.cur.acc.y, 2.0);
-        assert_eq!(sc.cur.vel.y, 2.0);
-        assert_eq!(sc.cur.pos.y, 15_000.0+2.0);
+        assert_eq!(sc.cur.acc.x, Acceleration::new::<meter_per_second_squared>(1.0));
+        assert_eq!(sc.cur.vel.x, Velocity::new::<meter_per_second>(1_673.0+1.0));
+        assert_eq!(sc.cur.pos.x, Length::new::<meter>(1_673.0+1.0));
+        assert_eq!(sc.cur.acc.y, Acceleration::new::<meter_per_second_squared>(2.0));
+        assert_eq!(sc.cur.vel.y, Velocity::new::<meter_per_second>(2.0));
+        assert_eq!(sc.cur.pos.y, Length::new::<meter>(15_000.0+2.0));
 
         nav(&mut sc, &SensorsValues {
-            dt_step: 1.0,
-            spacecraft_acc: Vec2 {x: 3.0, y: 4.0},
-            spacecraft_ang_acc: 0.0,
+            dt_step: Time::new::<second>(1.0),
+            spacecraft_acc: Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(3.0),
+                y: Acceleration::new::<meter_per_second_squared>(4.0),
+            },
+            spacecraft_ang_acc: AngularAcceleration::new::<degree_per_second_squared>(0.0),
             spacecraft_altitude: None,
         });
-        assert_eq!(sc.cur.acc.x, 3.0);
-        assert_eq!(sc.cur.vel.x, 1_673.0 + 1.0 + 3.0);
-        assert_eq!(sc.cur.pos.x, 1_673.0+1.0 + 1_673.0+1.0+3.0);
-        assert_eq!(sc.cur.acc.y, 4.0);
-        assert_eq!(sc.cur.vel.y, 2.0 + 4.0);
-        assert_eq!(sc.cur.pos.y, 15_000.0 + 2.0 + 2.0+4.0);
+        assert_eq!(sc.cur.acc.x, Acceleration::new::<meter_per_second_squared>(3.0));
+        assert_eq!(sc.cur.vel.x, Velocity::new::<meter_per_second>(1_673.0 + 1.0 + 3.0));
+        assert_eq!(sc.cur.pos.x, Length::new::<meter>(1_673.0+1.0 + 1_673.0+1.0+3.0));
+        assert_eq!(sc.cur.acc.y, Acceleration::new::<meter_per_second_squared>(4.0));
+        assert_eq!(sc.cur.vel.y, Velocity::new::<meter_per_second>(2.0 + 4.0));
+        assert_eq!(sc.cur.pos.y, Length::new::<meter>(15_000.0 + 2.0 + 2.0+4.0));
     }
 }

@@ -165,177 +165,314 @@ fn control_angular(conf: &Scenario, dt: Time, ctr_ang_pos: Angle, sc_mass: Mass,
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use uom::si::angular_velocity::degree_per_second;
+    use uom::si::force::newton;
+    use uom::si::mass::kilogram;
+
     use crate::assert_approx_eq;
+    use crate::conf::Scenario;
 
     #[test]
     fn test_gui_1_spacecraft_angle() {
-        let mass = 1_000.0;
-        let thrust = 20_000.0;
+        let mass = Mass::new::<kilogram>(1_000.0);
+        let thrust = Force::new::<newton>(20_000.0);
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 10.0, y: 0.0}, mass, thrust);
-        assert_eq!(ctr_angle, 0.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(10.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_angle, Angle::new::<radian>(0.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 7.071067811865475, y: 7.071067811865475}, mass, thrust);
-        assert_eq!(ctr_angle, PI/4.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(7.071067811865475),
+                y: Acceleration::new::<meter_per_second_squared>(7.071067811865475),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_angle, Angle::new::<radian>(PI/4.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 0.0, y: 10.0}, mass, thrust);
-        assert_eq!(ctr_angle, PI/2.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: Acceleration::new::<meter_per_second_squared>(10.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_angle, Angle::new::<radian>(PI/2.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: -7.071067811865475, y: 7.071067811865475}, mass, thrust);
-        assert_eq!(ctr_angle, 3.0*PI/4.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(-7.071067811865475),
+                y: Acceleration::new::<meter_per_second_squared>(7.071067811865475),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_angle, Angle::new::<radian>(3.0*PI/4.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: -10.0, y: 0.0}, mass, thrust);
-        assert_eq!(ctr_angle, PI);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(-10.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_angle, Angle::new::<radian>(PI));
     }
 
     #[test]
     fn test_gui_2_spacecraft_thrust() {
-        let mass = 1_000.0;
-        let thrust = 20_000.0;
+        let mass = Mass::new::<kilogram>(1_000.0);
+        let thrust = Force::new::<newton>(20_000.0);
 
         // +x
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 10.0, y: 0.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 10_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(10.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(10_000.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 20.0, y: 0.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 20_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(20.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(20_000.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 30.0, y: 0.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 20_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(30.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(20_000.0));
 
         // -x
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: -10.0, y: 0.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 10_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(-10.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(10_000.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: -20.0, y: 0.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 20_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(-20.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(20_000.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: -30.0, y: 0.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 20_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(-30.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(20_000.0));
 
         // +y
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 0.0, y: 10.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 10_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: Acceleration::new::<meter_per_second_squared>(10.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(10_000.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 0.0, y: 20.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 20_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: Acceleration::new::<meter_per_second_squared>(20.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(20_000.0));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 0.0, y: 30.0}, mass, thrust);
-        assert_eq!(ctr_thrust, 20_000.0);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: Acceleration::new::<meter_per_second_squared>(30.0),
+            },
+            mass,
+            thrust,
+        );
+        assert_eq!(ctr_thrust, Force::new::<newton>(20_000.0));
 
         // -y -> gravity
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 0.0, y: -10.0}, mass, thrust);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: -Acceleration::new::<meter_per_second_squared>(10.0),
+            },
+            mass,
+            thrust,
+        );
         assert_eq!(ctr_thrust, thrust);
-        assert_eq!(ctr_angle, PI);
+        assert_eq!(ctr_angle, Angle::new::<radian>(PI));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 0.0, y: -20.0}, mass, thrust);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: -Acceleration::new::<meter_per_second_squared>(20.0),
+            },
+            mass,
+            thrust,
+        );
         assert_eq!(ctr_thrust, thrust);
-        assert_eq!(ctr_angle, PI);
+        assert_eq!(ctr_angle, Angle::new::<radian>(PI));
 
-        let (ctr_thrust, ctr_angle) = control_translation(Vec2 {x: 0.0, y: -30.0}, mass, thrust);
+        let (ctr_thrust, ctr_angle) = control_translation(
+            Vec2 {
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: -Acceleration::new::<meter_per_second_squared>(30.0),
+            },
+            mass,
+            thrust,
+        );
         assert_eq!(ctr_thrust, thrust);
-        assert_eq!(ctr_angle, PI);
+        assert_eq!(ctr_angle, Angle::new::<radian>(PI));
     }
 
     #[test]
     fn test_gui_3_engine() {
-        {
-            let sc_mass = 1_000.0;  // Kg
-            let sc_thrust = 20_000.0;  // N = Kg*m/s**2
-            let sc_att_cur = 0.0*PI/180.0;  // rad
-            let eng_gimbal_cur = 0.0*PI/180.0;  // rad
 
-            let ctr_angle = 10.0*PI/180.0;  // rad
-            let eng_gimbal_ref = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal_ref, 0.25000079328132707*PI/180.0, 1e-6);
+        let f = std::fs::File::open("conf/Apollo-descent.yaml").unwrap();
+        let mut scenario: Scenario = serde_yaml::from_reader(f).unwrap();
+        scenario.ctr_eng_gimbal_kd = Some(Time::new::<second>(0.0));
+
+        let dt = Time::new::<second>(1.0);
+        let sc_ang_vel = AngularVelocity::new::<degree_per_second>(0.0);
+
+        {
+            scenario.ctr_eng_gimbal_kp = Some(Ratio::new::<ratio>(2.25));
+            scenario.ctr_eng_gimbal_vel_max = AngularVelocity::new::<degree_per_second>(1.0);
+
+            let sc_mass = Mass::new::<kilogram>(1_000.0);
+            let sc_att_cur = Angle::new::<degree>(0.0);
+            let eng_gimbal_cur = Angle::new::<degree>(0.0);
+
+            let ctr_angle = Angle::new::<degree>(10.0);
+            let eng_gimbal_ref = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal_ref, Angle::new::<degree>(0.25), Angle::new::<radian>(1e-6));
 
             // check linear (PID)
 
             {
-                let ctr_angle = 2.0*10.0*PI/180.0;  // rad
-                let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-                assert_approx_eq!(eng_gimbal, 2.0*eng_gimbal_ref, 1e-6);
+                let ctr_angle = Angle::new::<degree>(2.0*10.0);
+                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                assert_approx_eq!(eng_gimbal, 2.0*eng_gimbal_ref, Angle::new::<radian>(1e-6));
             }
 
             {
-                let ctr_angle = 3.0*10.0*PI/180.0;  // rad
-                let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-                assert_approx_eq!(eng_gimbal, 3.0*eng_gimbal_ref, 1e-6);
+                let ctr_angle = Angle::new::<degree>(3.0*10.0);
+                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                assert_approx_eq!(eng_gimbal, 3.0*eng_gimbal_ref, Angle::new::<radian>(1e-6));
             }
 
             // check ang vel max
 
-            let max_eng_gimbal_vel = 1.0*PI/180.0;  // TODO conf
+            let max_eng_gimbal_vel = Angle::new::<degree>(1.0);  // TODO conf
 
             {
-                let ctr_angle = 3.0*10.0*PI/180.0;  // rad
-                let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-                assert_approx_eq!(eng_gimbal, 3.0*eng_gimbal_ref, 1e-6);
+                let ctr_angle = Angle::new::<degree>(3.0*10.0);
+                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                assert_approx_eq!(eng_gimbal, 3.0*eng_gimbal_ref, Angle::new::<radian>(1e-6));
             }
             {
-                let ctr_angle = 4.0*10.0*PI/180.0;  // rad
-                let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-                assert_approx_eq!(eng_gimbal, max_eng_gimbal_vel, 1e-6);
+                let ctr_angle = Angle::new::<degree>(4.0*10.0);
+                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                assert_approx_eq!(eng_gimbal, max_eng_gimbal_vel, Angle::new::<radian>(1e-6));
             }
             {
-                let ctr_angle = 5.0*10.0*PI/180.0;  // rad
-                let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-                assert_approx_eq!(eng_gimbal, max_eng_gimbal_vel, 1e-6);
+                let ctr_angle = Angle::new::<degree>(5.0*10.0);
+                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                assert_approx_eq!(eng_gimbal, max_eng_gimbal_vel, Angle::new::<radian>(1e-6));
             }
         }
 
         // check ang pos max
 
         {
-            let sc_mass = 1_000.0;  // Kg
-            let sc_thrust = 10_000.0;  // N = Kg*m/s**2
-            let sc_att_cur = 0.0*PI/180.0;  // rad
+            scenario.ctr_eng_gimbal_kp = Some(Ratio::new::<ratio>(4.5));
+            scenario.ctr_eng_gimbal_vel_max = AngularVelocity::new::<degree_per_second>(2.0);
+
+            let sc_mass = Mass::new::<kilogram>(1_000.0);
+            let sc_att_cur = Angle::new::<degree>(0.0);
 
             // let max_eng_gimbal_pos = 4.0*PI/180.0;  // TODO conf
 
-            let eng_gimbal_cur = 3.5*PI/180.0;  // rad
+            let eng_gimbal_cur = Angle::new::<degree>(3.5);
 
             // ref
 
-            let ctr_angle = 70.0*PI/180.0;  // rad
-            let eng_gimbal_ref = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal_ref, 3.5*PI/180.0, 1e-4);
+            let ctr_angle = Angle::new::<degree>(70.0);
+            let eng_gimbal_ref = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal_ref, Angle::new::<degree>(3.5), Angle::new::<radian>(1e-4));
 
             // check linear (PID)
 
-            let ctr_angle = 60.0*PI/180.0;  // rad
-            let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal, eng_gimbal_ref - 2.0*0.25*PI/180.0, 1e-4);
+            let ctr_angle = Angle::new::<degree>(60.0);
+            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal, eng_gimbal_ref - Angle::new::<degree>(2.0*0.25), Angle::new::<radian>(1e-4));
 
-            let ctr_angle = 65.0*PI/180.0;  // rad
-            let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal, eng_gimbal_ref - 1.0*0.25*PI/180.0, 1e-4);
+            let ctr_angle = Angle::new::<degree>(65.0);
+            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal, eng_gimbal_ref - Angle::new::<degree>(1.0*0.25), Angle::new::<radian>(1e-4));
 
-            let ctr_angle = 70.0*PI/180.0;  // rad
-            let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal, eng_gimbal_ref, 1e-6);
+            let ctr_angle = Angle::new::<degree>(70.0);
+            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal, eng_gimbal_ref, Angle::new::<radian>(1e-4));
 
-            let ctr_angle = 75.0*PI/180.0;  // rad
-            let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal, eng_gimbal_ref + 1.0*0.25*PI/180.0, 1e-4);
+            let ctr_angle = Angle::new::<degree>(75.0);
+            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal, eng_gimbal_ref + Angle::new::<degree>(1.0*0.25), Angle::new::<radian>(1e-4));
 
-            let ctr_angle = 80.0*PI/180.0;  // rad
-            let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal, eng_gimbal_ref + 2.0*0.25*PI/180.0, 1e-4);
+            let ctr_angle = Angle::new::<degree>(80.0);
+            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal, eng_gimbal_ref + Angle::new::<degree>(2.0*0.25), Angle::new::<radian>(1e-4));
 
             // max
 
-            let ctr_angle = 85.0*PI/180.0;  // rad
-            let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal, eng_gimbal_ref + 2.0*0.25*PI/180.0, 1e-4);
+            let ctr_angle = Angle::new::<degree>(85.0);
+            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal, eng_gimbal_ref + Angle::new::<degree>(2.0*0.25), Angle::new::<radian>(1e-4));
 
-            let ctr_angle = 90.0*PI/180.0;  // rad
-            let eng_gimbal = control_angular(ctr_angle, sc_mass, sc_thrust, sc_att_cur, eng_gimbal_cur);
-            assert_approx_eq!(eng_gimbal, eng_gimbal_ref + 2.0*0.25*PI/180.0, 1e-4);
+            let ctr_angle = Angle::new::<degree>(90.0);
+            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            assert_approx_eq!(eng_gimbal, eng_gimbal_ref + Angle::new::<degree>(2.0*0.25), Angle::new::<radian>(1e-4));
         }
     }
 
