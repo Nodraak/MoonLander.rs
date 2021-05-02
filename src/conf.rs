@@ -1,7 +1,6 @@
 use serde::{Serialize, Deserialize};
 use uom::si::f64::*;
 use uom::si::ratio::ratio;
-use uom::si::frequency::hertz;
 use uom::si::time::second;
 
 use crate::utils::math::Vec2;
@@ -73,8 +72,8 @@ pub struct Scenario {
     pub gui_pf_y: Length,
 
     pub ctr_eng_gimbal_tau: Time,
-    pub ctr_eng_gimbal_kp: Option<Frequency>,
-    pub ctr_eng_gimbal_kd: Option<Ratio>,
+    pub ctr_eng_gimbal_kp: Option<Ratio>,
+    pub ctr_eng_gimbal_kd: Option<Time>,
 
     pub ctr_eng_gimbal_pos_max: Angle,
     pub ctr_eng_gimbal_vel_max: AngularVelocity,
@@ -94,15 +93,20 @@ pub struct Scenario {
 
 impl Scenario {
     pub fn load(filepath: &str) -> Self {
+        // parameters estimated with a power regression from simulation data
+        let kp_scale = 4.224639;
+        let kp_exponent = -1.524106;
+        let kd_scale = -2.203941;
+        let kd_exponent = -0.759514;
+
         let f = std::fs::File::open(filepath).unwrap();
         let mut scenario: Scenario = serde_yaml::from_reader(f).unwrap();
 
-        // transformation function estimated with a power regression from simulation data
-        scenario.ctr_eng_gimbal_kp = Some(Frequency::new::<hertz>(
-            3.09597849182108*scenario.ctr_eng_gimbal_tau.get::<second>().powf(-1.68850242456822)
+        scenario.ctr_eng_gimbal_kp = Some(Ratio::new::<ratio>(
+            kp_scale*scenario.ctr_eng_gimbal_tau.get::<second>().powf(kp_exponent)
         ));
-        scenario.ctr_eng_gimbal_kd = Some(Ratio::new::<ratio>(
-            -1.95872953220424*scenario.ctr_eng_gimbal_tau.get::<second>().powf(-0.784268123320289)
+        scenario.ctr_eng_gimbal_kd = Some(Time::new::<second>(
+            kd_scale*scenario.ctr_eng_gimbal_tau.get::<second>().powf(kd_exponent)
         ));
 
         scenario

@@ -37,10 +37,12 @@ ctr_eng_gimbal_tau: 1.208           # unit: s - time constant
 ctr_eng_gimbal_kp: null             # just need a placeholder, value autoset by loading function
 ctr_eng_gimbal_kd: null             # just need a placeholder, value autoset by loading function
 
+# SSME: 8-10 deg (https://science.ksc.nasa.gov/shuttle/technology/sts-newsref/sts-mps.html)
 ctr_eng_gimbal_pos_max: 0.069813  # 4 deg
 
 # Apollo dps: 0.2 deg / sec (https://www.ibiblio.org/apollo/Documents/SGA_Memo04_660120.pdf)
-ctr_eng_gimbal_vel_max: 0.017453  # 1 deg
+# SSME: 10-20 deg / sec (https://science.ksc.nasa.gov/shuttle/technology/sts-newsref/sts-mps.html)
+ctr_eng_gimbal_vel_max: 0.017453  # 1 deg / sec
 
 tgo_method: "TgoEstimateFixed"
 tgo_init: 0.0                       # used only with TgoEstimate::TgoGivenFixed

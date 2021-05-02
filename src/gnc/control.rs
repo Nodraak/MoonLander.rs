@@ -114,15 +114,25 @@ fn control_translation(goal_acc: Vec2<Acceleration>, sc_mass: Mass, sc_thrust: F
 ///     commanded (engine) gimbal_angle (respecting engine constraints)
 ///
 fn control_angular(conf: &Scenario, dt: Time, ctr_ang_pos: Angle, sc_mass: Mass, sc_ang_pos: Angle, sc_ang_vel: AngularVelocity, eng_gimbal_cur: Angle) -> Angle {
-    let kp: Frequency = conf.ctr_eng_gimbal_kp.unwrap();
-    let kd: Ratio = conf.ctr_eng_gimbal_kd.unwrap();
+    // some sanity checks
+    assert!(Time::new::<second>(1e-6) < dt);
+    assert!(dt <= Time::new::<second>(1.0));
 
-    assert!(dt > Time::new::<second>(1e-6));
+    // some variable aliases
+
+    let kp: Ratio = conf.ctr_eng_gimbal_kp.unwrap();
+    let kd: Time = conf.ctr_eng_gimbal_kd.unwrap();
+
+    // small hack to respect Dimensional analysis
+    // convert Angle into AngularAcceleration
+    let control_transfer_function = 1.0 / squared!(Time::new::<second>(1.0));
+
+    // ang acc PID
 
     let err: Angle = ctr_ang_pos - sc_ang_pos;
-    let control: AngularVelocity = (err*kp + sc_ang_vel*kd).into();
-
-    let ctr_ang_acc: AngularAcceleration = (control / Time::new::<second>(1.0)).into();  // small hack to respect Dimensional analysis
+    let derr: AngularVelocity = sc_ang_vel;  // TODO try derive err
+    let control: Angle = (kp*err + kd*derr).into();
+    let ctr_ang_acc: AngularAcceleration = (control * control_transfer_function).into();
 
     // compute torque for correction
 
@@ -135,6 +145,8 @@ fn control_angular(conf: &Scenario, dt: Time, ctr_ang_pos: Angle, sc_mass: Mass,
     assert!(sin_gimbal.abs() <= Ratio::new::<ratio>(1.0));
 
     let mut ctr_eng_gimbal: Angle = sin_gimbal.asin();
+
+    // apply engine gimbal limits (vel and pos)
 
     let eng_gimbal_vel: AngularVelocity = ((ctr_eng_gimbal - eng_gimbal_cur)/dt).into();
     if eng_gimbal_vel.abs() > conf.ctr_eng_gimbal_vel_max {
