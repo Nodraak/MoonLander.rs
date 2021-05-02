@@ -35,12 +35,9 @@
     * Test launch (orbitial or suborbital, with or without landing)
     * Land on the Mun!
 4. Write some blog articles
-    * TODO blog:
-        * Add disclaimer about Exomars and PTS at top of every Aerospace article
-        * Rehost pdfs to prevent 404
     * [ok] Guidance: tgo based guidance
-    * Control: double PID for rotation control from the engine gimbal
-    * uom
+    * [ok] uom
+    * [ok] Control: PID for rotation control of the engine gimbal
     * KSP lander: how to design a rocket
     * Navigation: radar altimeter: Kalman / custom fusion / Apollo fusion
     * Rust gnc and/or Performances for real-life implementation

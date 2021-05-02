@@ -1,11 +1,14 @@
-*Note: work in progress. Refer to [TODO.md](TODO.md) for the roadmap.*
-
 # README.md
 
-(Moon) lander guidance software.
+*Note: work in progress. Refer to [TODO.md](TODO.md) for the roadmap.*
+
+Moon\*1 lander\*2 guidance software.
 
 The goal is to land on [KSP's Mun](https://wiki.kerbalspaceprogram.com/wiki/Mun).
 This repo comes with a simulator to verify the guidance before attempting a landing.
+
+* \*1: Moon, or any other body
+* \*2: Land, or takeoff, or dv maneuver
 
 ## Architecture
 
@@ -69,7 +72,10 @@ Example landing (Apollo scenario):
 
 ## Key concepts needed for landing on the Moon
 
-* GNC
-* TGO-based guidance (PID with a predesigned trajectory is flaky)
+TODO: link blog article
+
+* GNC -> [blog](https://blog.nodraak.fr/2020/08/aerospace-sim-1-preliminary-study/)
+* TGO-based guidance (PID with a predesigned trajectory is flaky) -> [blog](https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/)
 * Take into account moon_gravity and moon_centrifugal (guidance)
-* PD controller for the engine gimbal, using the spacecraft's angular position (P term) and velocity (D term)
+* PD controller for the engine gimbal, using the spacecraft's angular position (P term) and velocity (D term) -> [blog](https://blog.nodraak.fr/2021/04/aerospace-sim-3-thrust-vector-control/)
+* IMU and radar altimeter sensor fusion
