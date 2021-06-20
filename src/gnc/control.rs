@@ -47,7 +47,14 @@ pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
     };
 
     let ctr_eng_gimbal: Angle = control_angular(
-        &conf, spacecraft.cur.dt, ctr_ang_pos, sc_mass, sc_ang_pos, sc_ang_vel, eng_gimbal_cur,
+        &conf,
+        spacecraft.cur.dt,
+        sc_mass,
+        ctr_sc_thrust,
+        sc_ang_pos,
+        sc_ang_vel,
+        eng_gimbal_cur,
+        ctr_ang_pos,
     );
 
     spacecraft.cur.eng_throttle = ctr_sc_thrust / sc_nom_thrust;
@@ -113,7 +120,16 @@ fn control_translation(goal_acc: Vec2<Acceleration>, sc_mass: Mass, sc_thrust: F
 /// Output:
 ///     commanded (engine) gimbal_angle (respecting engine constraints)
 ///
-fn control_angular(conf: &Scenario, dt: Time, ctr_ang_pos: Angle, sc_mass: Mass, sc_ang_pos: Angle, sc_ang_vel: AngularVelocity, eng_gimbal_cur: Angle) -> Angle {
+fn control_angular(
+    conf: &Scenario,
+    dt: Time,
+    sc_mass: Mass,
+    sc_cur_thrust: Force,
+    sc_ang_pos: Angle,
+    sc_ang_vel: AngularVelocity,
+    eng_gimbal_cur: Angle,
+    ctr_ang_pos: Angle
+) -> Angle {
     // some sanity checks
     assert!(Time::new::<second>(1e-6) < dt);
     assert!(dt <= Time::new::<second>(1.0));
@@ -141,7 +157,7 @@ fn control_angular(conf: &Scenario, dt: Time, ctr_ang_pos: Angle, sc_mass: Mass,
 
     // compute engine gimbal
 
-    let sin_gimbal: Ratio = ctr_torque/(conf.sc_height/2.0*conf.sc_nominal_thrust);  // Torque = L*F*sin(alpha)
+    let sin_gimbal: Ratio = ctr_torque/(conf.sc_height/2.0*sc_cur_thrust);  // Torque = L*F*sin(alpha)
     assert!(sin_gimbal.abs() <= Ratio::new::<ratio>(1.0));
 
     let mut ctr_eng_gimbal: Angle = sin_gimbal.asin();
@@ -385,20 +401,20 @@ mod tests {
             let eng_gimbal_cur = Angle::new::<degree>(0.0);
 
             let ctr_angle = Angle::new::<degree>(10.0);
-            let eng_gimbal_ref = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal_ref = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal_ref, Angle::new::<degree>(0.25), Angle::new::<radian>(1e-6));
 
             // check linear (PID)
 
             {
                 let ctr_angle = Angle::new::<degree>(2.0*10.0);
-                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
                 assert_approx_eq!(eng_gimbal, 2.0*eng_gimbal_ref, Angle::new::<radian>(1e-6));
             }
 
             {
                 let ctr_angle = Angle::new::<degree>(3.0*10.0);
-                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
                 assert_approx_eq!(eng_gimbal, 3.0*eng_gimbal_ref, Angle::new::<radian>(1e-6));
             }
 
@@ -408,17 +424,17 @@ mod tests {
 
             {
                 let ctr_angle = Angle::new::<degree>(3.0*10.0);
-                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
                 assert_approx_eq!(eng_gimbal, 3.0*eng_gimbal_ref, Angle::new::<radian>(1e-6));
             }
             {
                 let ctr_angle = Angle::new::<degree>(4.0*10.0);
-                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
                 assert_approx_eq!(eng_gimbal, max_eng_gimbal_vel, Angle::new::<radian>(1e-6));
             }
             {
                 let ctr_angle = Angle::new::<degree>(5.0*10.0);
-                let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+                let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
                 assert_approx_eq!(eng_gimbal, max_eng_gimbal_vel, Angle::new::<radian>(1e-6));
             }
         }
@@ -439,39 +455,39 @@ mod tests {
             // ref
 
             let ctr_angle = Angle::new::<degree>(70.0);
-            let eng_gimbal_ref = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal_ref = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal_ref, Angle::new::<degree>(3.5), Angle::new::<radian>(1e-4));
 
             // check linear (PID)
 
             let ctr_angle = Angle::new::<degree>(60.0);
-            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal, eng_gimbal_ref - Angle::new::<degree>(2.0*0.25), Angle::new::<radian>(1e-4));
 
             let ctr_angle = Angle::new::<degree>(65.0);
-            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal, eng_gimbal_ref - Angle::new::<degree>(1.0*0.25), Angle::new::<radian>(1e-4));
 
             let ctr_angle = Angle::new::<degree>(70.0);
-            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal, eng_gimbal_ref, Angle::new::<radian>(1e-4));
 
             let ctr_angle = Angle::new::<degree>(75.0);
-            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal, eng_gimbal_ref + Angle::new::<degree>(1.0*0.25), Angle::new::<radian>(1e-4));
 
             let ctr_angle = Angle::new::<degree>(80.0);
-            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal, eng_gimbal_ref + Angle::new::<degree>(2.0*0.25), Angle::new::<radian>(1e-4));
 
             // max
 
             let ctr_angle = Angle::new::<degree>(85.0);
-            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal, eng_gimbal_ref + Angle::new::<degree>(2.0*0.25), Angle::new::<radian>(1e-4));
 
             let ctr_angle = Angle::new::<degree>(90.0);
-            let eng_gimbal = control_angular(&scenario, dt, ctr_angle, sc_mass, sc_att_cur, sc_ang_vel, eng_gimbal_cur);
+            let eng_gimbal = control_angular(&scenario, dt, sc_mass, scenario.sc_nominal_thrust, sc_att_cur, sc_ang_vel, eng_gimbal_cur, ctr_angle);
             assert_approx_eq!(eng_gimbal, eng_gimbal_ref + Angle::new::<degree>(2.0*0.25), Angle::new::<radian>(1e-4));
         }
     }
