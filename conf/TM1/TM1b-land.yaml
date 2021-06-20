@@ -29,7 +29,7 @@ gui_af_y: 0.0
 gui_vf_y: -1.0
 gui_pf_y: 0.0
 
-ctr_eng_gimbal_tau: 1.0             # unit: s - time constant
+ctr_eng_gimbal_tau: 5.0             # unit: s - time constant
 ctr_eng_gimbal_kp: null             # just need a placeholder, value autoset by loading function
 ctr_eng_gimbal_kd: null             # just need a placeholder, value autoset by loading function
 
