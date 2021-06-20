@@ -17,7 +17,7 @@ use crate::utils::math::{Vec2, sign, saturate};
 pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
     let conf = spacecraft.conf.s;
     let sc_mass = conf.sc_dry_mass + spacecraft.cur.fuel_mass;
-    let sc_thrust = conf.sc_nominal_thrust;
+    let sc_nom_thrust = conf.sc_nominal_thrust;
     let sc_ang_pos = spacecraft.cur.ang_pos;
     let sc_ang_vel = spacecraft.cur.ang_vel;
     let eng_gimbal_cur: Angle = (spacecraft.cur.eng_gimbal*conf.ctr_eng_gimbal_pos_max).into();
@@ -25,23 +25,23 @@ pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
 
     let (ctr_sc_thrust, ctr_ang_pos): (Force, Angle) = match conf.ctr_spacecraft {
         CtrSpacecraft::CtrSpacecraftDescent | CtrSpacecraft::CtrSpacecraftAscentToHover => {
-            control_translation(goal_acc, sc_mass, sc_thrust)
+            control_translation(goal_acc, sc_mass, sc_nom_thrust)
         },
         CtrSpacecraft::CtrSpacecraftAscentToOrbit => {
-            let (_thrust, ctr_ang_pos_optim): (Force, Angle) = control_translation(goal_acc, sc_mass, sc_thrust);
+            let (_thrust, ctr_ang_pos_optim): (Force, Angle) = control_translation(goal_acc, sc_mass, sc_nom_thrust);
 
             // to avoid a dangerously big angular command, perform a nice constant pitch rate
             let tf = Time::new::<second>(50.0);
 
             if spacecraft.cur.t > tf {
-                (sc_thrust, ctr_ang_pos_optim)
+                (sc_nom_thrust, ctr_ang_pos_optim)
             } else {
                 let af = ctr_ang_pos_optim;
 
                 let na: Angle = (spacecraft.cur.t/tf*(Angle::new::<degree>(90.0)-af)).into();
 
                 let ctr_ang_pos: Angle = Angle::new::<degree>(90.0) - na;
-                (sc_thrust, ctr_ang_pos)
+                (sc_nom_thrust, ctr_ang_pos)
             }
         },
     };
@@ -50,7 +50,7 @@ pub fn ctr(spacecraft: &mut Spacecraft) -> ActuatorsValues {
         &conf, spacecraft.cur.dt, ctr_ang_pos, sc_mass, sc_ang_pos, sc_ang_vel, eng_gimbal_cur,
     );
 
-    spacecraft.cur.eng_throttle = ctr_sc_thrust / sc_thrust;
+    spacecraft.cur.eng_throttle = ctr_sc_thrust / sc_nom_thrust;
     spacecraft.cur.eng_gimbal = ctr_eng_gimbal / conf.ctr_eng_gimbal_pos_max;
 
     ActuatorsValues {
