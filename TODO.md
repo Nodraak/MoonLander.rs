@@ -13,6 +13,17 @@
             * https://www.nasa.gov/sites/default/files/atoms/files/soa2018_final_doc.pdf
             * https://www.colorado.edu/event/ippw2018/sites/default/files/attached-files/dltech_2_hormigo_presid501_presslides_docid1146.pdf
             * https://ntrs.nasa.gov/api/citations/20080033125/downloads/20080033125.pdf
+            ```
+                mass: 2%
+                thurst 1%
+                isp 0.5%
+                thrust
+                    noise 0.33 %
+                    misalign 0 deg
+                acc
+                    noise 35 μg/√Hz
+                    bias 0 ug
+            ```
         * Vel and pos from radar altimeter meas integration
     * Implement sim analysis loop: determine TGO, check fuel, ...
         * [ok] Estimate tgo

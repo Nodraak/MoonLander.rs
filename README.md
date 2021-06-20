@@ -72,8 +72,6 @@ Example landing (Apollo scenario):
 
 ## Key concepts needed for landing on the Moon
 
-TODO: link blog article
-
 * GNC -> [blog](https://blog.nodraak.fr/2020/08/aerospace-sim-1-preliminary-study/)
 * TGO-based guidance (PID with a predesigned trajectory is flaky) -> [blog](https://blog.nodraak.fr/2020/12/aerospace-sim-2-guidance-law/)
 * Take into account moon_gravity and moon_centrifugal (guidance)
