@@ -28,3 +28,18 @@ macro_rules! norm {
         sqrt!(squared!($quantity.x) + squared!($quantity.y))
     }};
 }
+
+
+#[macro_export]
+macro_rules! modulo {
+    ($val:expr, $modval:expr) => {{
+        let mut ret = $val;
+        while ret > ($modval/2.0).into() {
+            ret -= $modval;
+        }
+        while ret < (-$modval/2.0).into() {
+            ret += $modval;
+        }
+        ret
+    }};
+}

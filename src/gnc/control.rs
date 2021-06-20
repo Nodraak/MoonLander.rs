@@ -6,7 +6,7 @@ use uom::si::angle::{degree, radian};
 use uom::si::ratio::ratio;
 use uom::si::time::second;
 
-use crate::{sqrt, squared};
+use crate::{sqrt, squared, modulo};
 use crate::adapters::common::ActuatorsValues;
 use crate::conf::{Scenario, CtrSpacecraft};
 use crate::gnc::common::Spacecraft;
@@ -144,8 +144,7 @@ fn control_angular(
     let control_transfer_function = 1.0 / squared!(Time::new::<second>(1.0));
 
     // ang acc PID
-
-    let err: Angle = ctr_ang_pos - sc_ang_pos;
+    let err: Angle = modulo!(ctr_ang_pos - sc_ang_pos, Angle::new::<degree>(360.0));
     let derr: AngularVelocity = sc_ang_vel;  // TODO try derive err
     let control: Angle = (kp*err + kd*derr).into();
     let ctr_ang_acc: AngularAcceleration = (control * control_transfer_function).into();
