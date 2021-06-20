@@ -84,14 +84,12 @@ impl Adapter for AdapterKSP<'_> {
     /// ## kRPC API and conventions:
     ///
     /// flight.pitch: The pitch of the vessel relative to the horizon, in
-    /// degrees. A value between -90° and +90°.
-    /// flight.heading: The heading of the vessel (its angle relative to north),
-    /// in degrees. A value between 0° and 360°.
+    ///     degrees. A value between -90° and +90°.
     ///
-    /// control.pitch: The state of the pitch control. A value between -1 and 1.
-    /// Equivalent to the w and s keys.
-    /// control.yaw: The state of the yaw control. A value between -1 and 1.
-    /// Equivalent to the a and d keys.
+    /// flight.heading: The heading of the vessel (its angle relative to north),
+    ///     in degrees. A value between 0° and 360°.
+    ///
+    /// Source: https://krpc.github.io/krpc/python/api/space-center/flight.html
     ///
     /// ## kRPC velocity bug
     ///
@@ -171,6 +169,17 @@ impl Adapter for AdapterKSP<'_> {
         }
     }
 
+    /// ## kRPC API and conventions:
+    ///
+    /// control.throttle: The state of the throttle. A value between 0 and 1.
+    ///
+    /// control.pitch: The state of the pitch control. A value between -1 and 1.
+    ///     Equivalent to the w and s keys.
+    ///
+    /// control.yaw: The state of the yaw control. A value between -1 and 1.
+    ///     Equivalent to the a and d keys.
+    ///
+    /// Source: https://krpc.github.io/krpc/python/api/space-center/control.html
     fn write_actuators(&mut self, control: ActuatorsValues) {
         let ves_control = self.vessel.getattr("control").unwrap();
 
