@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use uom::si::f64::*;
+use uom::si::f64::{Acceleration, Angle, AngularAcceleration, AngularVelocity, Length, Mass, Ratio, Time, Velocity};
 use uom::si::acceleration::meter_per_second_squared;
 use uom::si::angular_acceleration::radian_per_second_squared;
 use uom::si::angular_velocity::radian_per_second;
