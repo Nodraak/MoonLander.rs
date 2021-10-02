@@ -282,14 +282,16 @@ def main():
             elif obj == 'Sim':
                 obj = sim_data
             else:
-                raise Exception
+                continue
+                #raise Exception
 
             if func == 'export_to_csv_cur':
                 func = 'add_cur'
             elif func == 'export_to_csv_conf':
                 func = 'add_conf'
             else:
-                raise Exception
+                continue
+                #raise Exception
 
             getattr(obj, func)(json.loads(data))
 

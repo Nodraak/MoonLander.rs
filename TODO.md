@@ -1,5 +1,13 @@
 # TODO.md
 
+
+print ksp pos, vel, acc
+print sim pos, vel, acc
+
+try project ksp to compute sensors acc, check if both prints match
+
+
+
 0. Basic
     * [ok] Rust Hello world
 1. Sim
@@ -52,3 +60,12 @@
     * KSP lander: how to design a rocket
     * Navigation: radar altimeter: Kalman / custom fusion / Apollo fusion
     * Rust gnc and/or Performances for real-life implementation
+
+
+Pitch mismatch:
+    1. Check sensor raw values equal sc nav values
+    2. Feed ksp-like values from sim to sc nav to test
+
+
+doc (https://github.com/iliekturtles/uom/issues/177)
+add moment of inertia unit

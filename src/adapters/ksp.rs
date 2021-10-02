@@ -109,6 +109,13 @@ impl Adapter for AdapterKSP<'_> {
             .getattr("met").unwrap()
             .extract().unwrap());
 
+        /*
+            vel.heading
+            vel.pitch
+            flight.heading
+            flight.pitch
+        */
+
         let vel_ = self.vessel
             .call_method1("flight", (self.body_ref_frame, )).unwrap()
             .getattr("velocity").unwrap();
@@ -185,6 +192,12 @@ impl Adapter for AdapterKSP<'_> {
 
         ves_control.setattr("throttle", control.engine_throttle.get::<ratio>()).unwrap();
         ves_control.setattr("pitch", -control.engine_gimbal.get::<ratio>()).unwrap();
+
+        /*
+            pitch
+            yaw
+            (roll)
+        */
     }
 
     fn export_to_csv_conf(&self) {
