@@ -1,8 +1,5 @@
 use uom::si::f64::*;
 use uom::si::acceleration::meter_per_second_squared;
-use uom::si::angle::degree;
-use uom::si::angular_acceleration::degree_per_second_squared;
-use uom::si::angular_velocity::degree_per_second;
 use uom::si::length::meter;
 use uom::si::mass::kilogram;
 use uom::si::ratio::ratio;
@@ -56,14 +53,14 @@ impl Spacecraft {
         assert!(self.cur.acc.x.abs() < Acceleration::new::<meter_per_second_squared>(100.0));
         assert!(self.cur.acc.y.abs() < Acceleration::new::<meter_per_second_squared>(100.0));
 
-        assert!(Angle::new::<degree>(-180.1) <= self.cur.ang_pos);
-        assert!(self.cur.ang_pos <= Angle::new::<degree>(180.1));
+        // assert!(Angle::new::<degree>(-180.1) <= self.cur.ang_pos);
+        // assert!(self.cur.ang_pos <= Angle::new::<degree>(180.1));
 
-        assert!(AngularVelocity::new::<degree_per_second>(-5.0) <= self.cur.ang_vel);
-        assert!(self.cur.ang_vel <= AngularVelocity::new::<degree_per_second>(5.0));
+        // assert!(AngularVelocity::new::<degree_per_second>(-5.0) <= self.cur.ang_vel);
+        // assert!(self.cur.ang_vel <= AngularVelocity::new::<degree_per_second>(5.0));
 
-        assert!(AngularAcceleration::new::<degree_per_second_squared>(-5.0) <= self.cur.ang_acc);
-        assert!(self.cur.ang_acc <= AngularAcceleration::new::<degree_per_second_squared>(5.0));
+        // assert!(AngularAcceleration::new::<degree_per_second_squared>(-5.0) <= self.cur.ang_acc);
+        // assert!(self.cur.ang_acc <= AngularAcceleration::new::<degree_per_second_squared>(5.0));
     }
 
     pub fn export_to_csv_conf(&self) {

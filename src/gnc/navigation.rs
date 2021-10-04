@@ -7,6 +7,7 @@ use crate::{mul, norm, sqrt, squared, modulo};
 use crate::adapters::common::SensorsValues;
 use crate::gnc::common::Spacecraft;
 use crate::utils::math::Vec2;
+use crate::utils::quat::Quaternion;
 
 
 pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: &SensorsValues) {
@@ -38,10 +39,8 @@ pub fn nav(spacecraft: &mut Spacecraft, sensors_vals: &SensorsValues) {
     spacecraft.cur.dv += spacecraft.cur.acc_thrust*dt;
 
     spacecraft.cur.ang_acc = sensors_vals.spacecraft_ang_acc;
-    let dav: AngularVelocity = (spacecraft.cur.ang_acc*dt).into();
-    spacecraft.cur.ang_vel += dav;
-    let dap: Angle = (spacecraft.cur.ang_vel*dt).into();
-    spacecraft.cur.ang_pos += dap;
+    // spacecraft.cur.ang_vel.integrate(spacecraft.cur.ang_acc, dt);
+    // spacecraft.cur.ang_pos.integrate(spacecraft.cur.ang_vel, dt);
     spacecraft.cur.ang_pos = modulo!(spacecraft.cur.ang_pos, Angle::new::<degree>(360.0));
 
     // TODO cross check altitude - kalman filter?

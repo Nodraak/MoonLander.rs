@@ -3,6 +3,7 @@ use std::f64::consts::PI;
 use uom::si::f64::*;
 use uom::si::acceleration::meter_per_second_squared;
 use uom::si::angle::{degree, radian};
+use uom::si::angular_acceleration::radian_per_second_squared;
 use uom::si::ratio::ratio;
 use uom::si::time::second;
 
@@ -11,6 +12,7 @@ use crate::adapters::common::ActuatorsValues;
 use crate::conf::{Scenario, CtrSpacecraft};
 use crate::gnc::common::Spacecraft;
 use crate::utils::math::{Vec2, sign, saturate};
+use crate::utils::quat::Quaternion;
 
 
 /// Main control function
@@ -144,10 +146,11 @@ fn control_angular(
     let control_transfer_function = 1.0 / squared!(Time::new::<second>(1.0));
 
     // ang acc PID
-    let err: Angle = modulo!(ctr_ang_pos - sc_ang_pos, Angle::new::<degree>(360.0));
-    let derr: AngularVelocity = sc_ang_vel;  // TODO try derive err
-    let control: Angle = (kp*err + kd*derr).into();
-    let ctr_ang_acc: AngularAcceleration = (control * control_transfer_function).into();
+    // let err: Quaternion<Angle> = modulo!(ctr_ang_pos - sc_ang_pos, Angle::new::<degree>(360.0));
+    // let derr: Quaternion<AngularVelocity> = sc_ang_vel;  // TODO try derive err
+    // let control: Quaternion<Angle> = (kp*err + kd*derr).into();
+    // let ctr_ang_acc: Quaternion<AngularAcceleration> = (control * control_transfer_function).into();
+    let ctr_ang_acc = AngularAcceleration::new::<radian_per_second_squared>(1.0);
 
     // compute torque for correction
 
