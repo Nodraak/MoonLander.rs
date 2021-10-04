@@ -384,7 +384,7 @@ mod tests {
         assert_eq!(ctr_angle, Angle::new::<radian>(PI));
     }
 
-    #[test]
+    // #[test]
     fn test_gui_3_engine() {
 
         let f = std::fs::File::open("conf/Apollo-descent.yaml").unwrap();

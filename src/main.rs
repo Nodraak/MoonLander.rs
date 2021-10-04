@@ -9,6 +9,10 @@ mod utils;
 
 use std::process::exit;
 use std::{thread, time};
+
+#[macro_use]
+extern crate assert_float_eq;
+
 use clap;
 use pyo3::prelude::*;
 use serde_json;
